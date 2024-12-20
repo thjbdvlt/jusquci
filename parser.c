@@ -814,6 +814,8 @@ parse_word(TParser* pst)
 
       /* jusqu' ici */
       case '\'':
+      case L'’':
+      case L'‘':
         pst->pos++;
         return TS_WORD;
         break;
