@@ -1,0 +1,11 @@
+MODULE_big = jusquci
+EXTENSION = jusquci
+HEADERS = parser.h
+OBJS = jusquci.o parser.o
+DATA = jusquci--1.0.sql
+
+PG_CFLAGS = -DJUSQUCI_POSTGRESQL
+
+PG_CONFIG ?= pg_config
+PGXS := $(shell $(PG_CONFIG) --pgxs)
+include $(PGXS)

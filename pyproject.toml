@@ -1,0 +1,30 @@
+[project]
+name = "jusquCy"
+authors = [{name="thjbdvlt"}]
+version = "0.1.0"
+description = "tokenizer for french written in C."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/thjbdvlt/jusquci"
+
+[build-system]
+requires = ["setuptools>=74.1"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+ext-modules = [{name = "jusqucy.jusqucy", sources = ["parser.c", "jusqucy/jusqucy.c"], include-dirs = ["lib"], py-limited-api = true }]
+
+[tool.setuptools.packages]
+find = {}
+
+[tool.ruff]
+exclude = []
+line-length = 72
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = false
