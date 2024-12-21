@@ -1,18 +1,17 @@
 #define PY_SSIZE_T_CLEAN
-#include <Python.h>
 #include "../parser.h"
+#include <Python.h>
 
 static PyObject*
 tokenize(PyObject* self, PyObject* arg)
 {
   TParser pst;          /* parser */
   Py_ssize_t len, _len; /* len of input string */
-  wchar_t *str, *p;     /* string converted to wide char */
+  wchar_t *str;     /* string converted to wide char */
   int i, y, ttype;      /* for iterations */
 
   PyObject *input, *ret; /* input value and output values */
   PyObject *list_words, *list_types, *list_spaces; /* lists */
-  PyObject *curspace, *curtype, *curtext;          /* iteration */
 
   /* get the parameter value */
   if (!PyArg_Parse(arg, "U:tokenize", &input)) {
@@ -48,12 +47,20 @@ tokenize(PyObject* self, PyObject* arg)
   /* initialize the parser with the string to parse */
   init_parser(&pst, str, (int)len);
 
-  // dynamic memory allocation would be better, i guess
+  /* allocate memory for temporary array of integers */
   int* spaces = (int*)malloc(sizeof(int*) * len);
   int* idx = (int*)malloc(sizeof(int*) * len);
   int* lens = (int*)malloc(sizeof(int*) * len);
   int* types = (int*)malloc(sizeof(int*) * len);
 
+  /* ensure that memory has been allocated */
+  if (!spaces || !idx || !lens || !types) {
+    free_parser(&pst);
+    free(str);
+    return PyErr_NoMemory();
+  }
+
+  /* get the type of the first token */
   ttype = get_token(&pst);
 
   /* if the list is empty, returns empty list, skip following parts.
@@ -102,21 +109,22 @@ MakeLists:
 
   if (!list_words || !list_types || !list_words) {
     ret = PyErr_NoMemory();
+    Py_XDECREF(list_types);
+    Py_XDECREF(list_words);
+    Py_XDECREF(list_spaces);
     goto FreeEnd;
   }
 
   /* populate the lists */
   for (y = 0; y < i; y++) {
-    p = &pst.str[idx[y]];
-    curspace = Py_BuildValue("i", spaces[y]);
-    curtype = Py_BuildValue("i", types[y]);
-    curtext = PyUnicode_FromWideChar(p, lens[y]);
-    PyList_SET_ITEM(list_words, y, curtext);
-    PyList_SET_ITEM(list_spaces, y, curspace);
-    PyList_SET_ITEM(list_types, y, curtype);
+    PyList_SET_ITEM(
+      list_words, y, PyUnicode_FromWideChar(&pst.str[idx[y]], lens[y]));
+    PyList_SET_ITEM(list_spaces, y, PyLong_FromLong(spaces[y]));
+    PyList_SET_ITEM(list_types, y, PyLong_FromLong(types[y]));
   }
 
-  ret = Py_BuildValue("(OOO)", list_words, list_types, list_spaces);
+  /* build the final tuple */
+  ret = PyTuple_Pack(3, list_words, list_types, list_spaces);
 
   /* decrement reference count of each list. */
   Py_DECREF(list_types);
