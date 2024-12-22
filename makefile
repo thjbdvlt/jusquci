@@ -1,7 +1,7 @@
 MODULE_big = jusquci
 EXTENSION = jusquci
 HEADERS = parser.h
-OBJS = jusquci.o parser.o
+OBJS = jusquci.o parser.o affixes.o punct.o util.o
 DATA = jusquci--1.0.sql
 
 PG_CFLAGS = -DJUSQUCI_POSTGRESQL

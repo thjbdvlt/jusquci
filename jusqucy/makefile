@@ -7,18 +7,13 @@ CC_FLAGS = -shared -fPIC \
 SOURCES = 
 OBJECTS = jusqucy.so
 
-all: jusqucy.so presqucy.so
+all: jusqucy.so
 
 jusqucy.so: ../parser.c jusqucy.c 
 	$(CC) $(CC_FLAGS) ../parser.c jusqucy.c -o $@
 
-presqucy.so: presqucy.c
-	$(CC) $(CC_FLAGS) presqucy.c -o $@
-
-test: presqucy.so jusqucy.so
+test: jusqucy.so
 	python3 -c "import jusqucy; print(jusqucy.tokenize('a'))"
-	python3 -c "import presqucy; print(presqucy.norm('a'))"
-	python3 -c "import presqucy; print(presqucy.norm('AUTEUR.RICE.XS?'))"
 
 clean:
 	rm -f *.so *.o

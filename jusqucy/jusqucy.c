@@ -55,7 +55,6 @@ tokenize(PyObject* self, PyObject* arg)
 
   /* ensure that memory has been allocated */
   if (!spaces || !idx || !lens || !types) {
-    free_parser(&pst);
     free(str);
     return PyErr_NoMemory();
   }
@@ -123,8 +122,8 @@ MakeLists:
     //   PyUnicode_WriteChar(word, i, 'C');
     // PyList_SET_ITEM(list_words, y, word);
 
-    // PyList_SET_ITEM(
-    //   list_words, y, PyUnicode_FromWideChar(&pst.str[idx[y]], lens[y]));
+    PyList_SET_ITEM(
+      list_words, y, PyUnicode_FromWideChar(&pst.str[idx[y]], lens[y]));
     PyList_SET_ITEM(list_spaces, y, PyLong_FromLong(spaces[y]));
     PyList_SET_ITEM(list_types, y, PyLong_FromLong(types[y]));
   }
@@ -140,7 +139,6 @@ MakeLists:
 FreeEnd:
 
   /* free memory for the parser and for the wchar_t* string */
-  free_parser(&pst);
   free(str);
   free(spaces);
   free(idx);

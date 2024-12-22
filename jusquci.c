@@ -19,7 +19,8 @@ jusquci_parser_start(PG_FUNCTION_ARGS)
   TParser* pst;
   size_t len;
   char* _str;
-  wchar_t* str;
+  // wchar_t* str;
+  pg_wchar* str;
 
   // allocate memory for parser
   pst = (TParser*)palloc0(sizeof(TParser));
@@ -35,7 +36,8 @@ jusquci_parser_start(PG_FUNCTION_ARGS)
   len = (size_t)PG_GETARG_INT32(1);
 
   // convert to wide char.
-  str = (wchar_t*)palloc0(sizeof(wchar_t*) * len);
+  // str = (wchar_t*)palloc0(sizeof(wchar_t*) * len);
+  str = (pg_wchar*)palloc0(sizeof(pg_wchar*) * len);
 
   // convert multbytes to wide char string, and get the length
   // here is the problem. for, e.g. "et?" it's correct (3), but for
@@ -44,6 +46,7 @@ jusquci_parser_start(PG_FUNCTION_ARGS)
   len = (size_t)pg_mb2wchar_with_len(_str, (pg_wchar*)str, (int)len);
 
   // pst->strlen = (int)len;
+  // TODO: pg_2pgwchar (if exists?)
   init_parser(pst, str, (int)len);
   pst->_str = _str;
 
@@ -55,7 +58,6 @@ jusquci_parser_end(PG_FUNCTION_ARGS)
 {
   // free memory allocated for parser: there is nothing else to do
   TParser* pst = (TParser*)PG_GETARG_POINTER(0);
-  free_parser(pst); // TODO: pfree(), pinit_parser() using palloc
   pfree(pst->str);
   pfree(pst);
   PG_RETURN_VOID();

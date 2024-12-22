@@ -1,4 +1,36 @@
-#include <wchar.h>
+#ifndef PARSER_H
+#define PARSER_H
+
+// TODO: depends of Python (Py_UCS4)
+typedef unsigned int jchar;
+
+// the parser struct holds informations about string to be parsed,
+// state (position) and current token.
+typedef struct
+{
+  // the whole string to parse
+  jchar* str; // the string to be parsed
+  int strlen;   // the length of the string
+  int pos;      // the current position
+
+  // current token
+  int tlen;  // length
+  int tidx;  // index (first character)
+  int ttype; // token type (word, space, ...)
+
+  // for char*.
+  // (not used by 'get_token', only for the Postgres extension)
+  char* _str;
+  int _mb; // multibytes characters (difference)
+  int _pos;
+  int _len;
+
+  // sometimes, the type of the next token is known in advance.
+  // used by the parser for cases like 'penses-tu' (penses -tu).
+  int _next;
+  int _prev;
+
+} TParser;
 
 // token types identifiers
 #define TS_ANY -2
@@ -21,58 +53,8 @@
 #define TS_SPACESIGN 15
 #define TS_LASTNUM 15
 
-// the parser struct holds informations about string to be parsed,
-// state (position) and current token.
-typedef struct
-{
-  // the whole string to parse
-  wchar_t* str; // the string to be parsed
-  int strlen;   // the length of the string
-  int pos;      // the current position
-
-  // current token
-  int tlen;  // length
-  int tidx;  // index (first character)
-  int ttype; // token type (word, space, ...)
-
-  // for char*.
-  // (not used by 'get_token', only for the Postgres extension)
-  char* _str;
-  int _mb; // multibytes characters (difference)
-  int _pos;
-  int _len;
-
-  // sometimes, the type of the next token is known in advance.
-  // used by the parser for cases like 'penses-tu' (penses -tu).
-  int _next;
-  int _prev;
-
-#ifdef JUSQUCI_TRACK
-  // inclusive suffixes
-  int* suffidx;
-  int* sufflen;
-  int nsuff;
-  int maxsuff;
-
-  // compound words
-  int* compsep;
-  int ncomp;
-  int maxcomp;
-#endif
-
-} TParser;
-
-
+// main functions
 int get_token(TParser* pst);
-void init_parser(TParser* pst, wchar_t* str, int len);
-void free_parser(TParser* pst);
-void reinit_parser(TParser* pst, wchar_t* str, int len);
+void init_parser(TParser* pst, jchar* str, int len);
 
-
-// function to get the character type (word character, punct, ...)
-int iswordch(wchar_t c);
-int getchtype(wchar_t c);
-
-
-// compare two string. (the first string is lowercased.)
-int cmpi(wchar_t* s_anycase, wchar_t* s_lowercase, size_t len);
+#endif

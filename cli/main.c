@@ -1,4 +1,6 @@
 #include "../parser.h"
+#include <wctype.h>
+#include <wchar.h>
 #include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,10 +8,10 @@
 #define BASE_SIZE 256
 
 void
-tokenize_print(TParser* pst, wchar_t* text, int len)
+tokenize_print(TParser* pst, jchar* text, int len)
 {
   // init or re-init parser
-  reinit_parser(pst, text, len);
+  init_parser(pst, text, len);
 
   int ttype = TS_START;
 
@@ -22,7 +24,7 @@ tokenize_print(TParser* pst, wchar_t* text, int len)
 
       // iterate over the chars of the token
       for (int c = 0; c < pst->tlen; c++)
-        putwchar(pst->str[pst->tidx + c]);
+        putwchar((wchar_t)pst->str[pst->tidx + c]);
 
       putwchar(L' ');
 
@@ -70,7 +72,7 @@ main(int argc, char** argv)
 
     // parse newline per newline
     if (c == '\n') {
-      tokenize_print(&pst, str, (int)index);
+      tokenize_print(&pst, (jchar*)str, (int)index);
       index = 0;
       continue;
 
@@ -82,7 +84,7 @@ main(int argc, char** argv)
   }
 
   free(str);
-  free_parser(&pst);
+  // free_parser(&pst);
 
   return 0;
 }
