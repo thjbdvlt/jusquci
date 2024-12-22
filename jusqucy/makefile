@@ -4,16 +4,17 @@ CC_FLAGS = -shared -fPIC \
 		   -Wall -Wextra -Wconversion -Wno-unused-variable \
 		   -Wno-unused-parameter -O2 -g
 
-SOURCES = 
+SOURCES = ../src/*.c jusqucy.c
 OBJECTS = jusqucy.so
 
 all: jusqucy.so
 
-jusqucy.so: ../parser.c jusqucy.c 
-	$(CC) $(CC_FLAGS) ../parser.c jusqucy.c -o $@
+jusqucy.so: ../src/parser.c jusqucy.c 
+	$(CC) $(CC_FLAGS) $(SOURCES) -o $@
 
 test: jusqucy.so
 	python3 -c "import jusqucy; print(jusqucy.tokenize('a'))"
+	python3 -c "import jusqucy; print(jusqucy.tokenize('éééte auteur·rice·x'))"
 
 clean:
 	rm -f *.so *.o

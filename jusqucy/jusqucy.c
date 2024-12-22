@@ -1,7 +1,7 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-#include "../parser.h"
+#include "../src/parser.h"
 
 static PyObject*
 tokenize(PyObject* self, PyObject* arg)
@@ -45,7 +45,7 @@ tokenize(PyObject* self, PyObject* arg)
   ttype = TS_START;
 
   /* initialize the parser with the string to parse */
-  init_parser(&pst, str, (int)len);
+  init_parser(&pst, (jchar*)str, (int)len);
 
   /* allocate memory for temporary array of integers */
   int* spaces = (int*)malloc(sizeof(int*) * (size_t)len);

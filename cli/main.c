@@ -1,4 +1,4 @@
-#include "../parser.h"
+#include "../src/parser.h"
 #include <wctype.h>
 #include <wchar.h>
 #include <locale.h>

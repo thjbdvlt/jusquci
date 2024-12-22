@@ -1,5 +1,5 @@
 CC = gcc
-SOURCES = ../util.c ../punct.c ../affixes.c ../parser.c main.c 
+SOURCES = ../src/*.c main.c
 CCFLAGS = -Wall -Wextra -Wconversion -Wno-unused-variable -Wno-unused-parameter
 
 jusquci: $(SOURCES)

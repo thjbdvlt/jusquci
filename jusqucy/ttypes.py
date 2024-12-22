@@ -1,6 +1,5 @@
-"""Token types. (See: ../parser.h)"""
+"""Token types. (See: ../src/parser.h)"""
 
-# see ../parser.h
 from enum import Enum
 
 
