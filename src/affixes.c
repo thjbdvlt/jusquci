@@ -133,10 +133,6 @@ match_suff(jchar* str, const suffix* suffix, int max, jchar sep)
   /* ensure all the characters from the suffixes are in the string
    */
   for (i = 0; i < suffix->len; i++) {
-    // TODO: there's probably a simplier way.
-    // if (iswupper((wint_t)str[i]) ?
-    // (wchar_t)towlower((wint_t)str[i])
-    //                              : str[i] != suffix->str[i])
     if (towlower(str[i]) != suffix->str[i])
       return NULL;
   }

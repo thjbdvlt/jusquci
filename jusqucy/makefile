@@ -14,7 +14,8 @@ jusqucy.so: ../src/parser.c jusqucy.c
 
 test: jusqucy.so
 	python3 -c "import jusqucy; print(jusqucy.tokenize('a'))"
-	python3 -c "import jusqucy; print(jusqucy.tokenize('éééte auteur·rice·x'))"
+	python3 -c "import jusqucy; print(jusqucy.tokenize('éééte auteur·rice·x et· et les.euse.s'))"
+	python3 -c "import jusqucy; print(jusqucy.tokenize('éééte auteur·RIce·x et· et les.Ère.s'))"
 
 clean:
 	rm -f *.so *.o

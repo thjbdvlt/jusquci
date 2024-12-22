@@ -36,17 +36,13 @@ jusquci_parser_start(PG_FUNCTION_ARGS)
   len = (size_t)PG_GETARG_INT32(1);
 
   // convert to wide char.
-  // str = (wchar_t*)palloc0(sizeof(wchar_t*) * len);
   str = (pg_wchar*)palloc0(sizeof(pg_wchar*) * len);
 
   // convert multbytes to wide char string, and get the length
   // here is the problem. for, e.g. "et?" it's correct (3), but for
   // "et»" it's wrong (4); but for "ôlî" its correct, too (3).
-  // mbstowcs(pst->str, pst->_str, len);
   len = (size_t)pg_mb2wchar_with_len(_str, (pg_wchar*)str, (int)len);
 
-  // pst->strlen = (int)len;
-  // TODO: pg_2pgwchar (if exists?)
   init_parser(pst, str, (int)len);
   pst->_str = _str;
 

@@ -1,8 +1,7 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-// TODO: depends of Python (Py_UCS4)
-typedef unsigned int jchar;
+typedef unsigned int jchar; // jchar == pg_wchar == Py_UCS4
 
 // the parser struct holds informations about string to be parsed,
 // state (position) and current token.
@@ -32,6 +31,10 @@ typedef struct
 
 } TParser;
 
+// main functions
+int get_token(TParser* pst);
+void init_parser(TParser* pst, jchar* str, int len);
+
 // token types identifiers
 #define TS_ANY -2
 #define TS_START -1
@@ -52,9 +55,5 @@ typedef struct
 #define TS_NEWLINE 14
 #define TS_SPACESIGN 15
 #define TS_LASTNUM 15
-
-// main functions
-int get_token(TParser* pst);
-void init_parser(TParser* pst, jchar* str, int len);
 
 #endif

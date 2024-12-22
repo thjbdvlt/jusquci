@@ -8,9 +8,7 @@ tokenize(PyObject* self, PyObject* arg)
 {
   TParser pst;          /* parser */
   Py_ssize_t len, _len; /* len of input string */
-  wchar_t *str;     /* string converted to wide char */
-  int i, y, ttype;      /* for iterations */
-
+  int i, y, ttype; /* for iterations */
   PyObject *input, *ret; /* input value and output values */
   PyObject *list_words, *list_types, *list_spaces; /* lists */
 
@@ -26,18 +24,10 @@ tokenize(PyObject* self, PyObject* arg)
     return NULL;
   }
 
-  /* allocate memory for its content */
-  if (!(str = malloc(sizeof(wchar_t*) * (size_t)len)))
+  Py_UCS4* str;
+  str = PyUnicode_AsUCS4Copy(input);
+  if (!str)
     return PyErr_NoMemory();
-
-  /* copy its values to the wchar_t pointer */
-  if ((_len = PyUnicode_AsWideChar(input, str, len)) == -1) {
-    PyErr_BadArgument();
-    return NULL;
-  }
-
-  /* check that the lengths are equal -- or my code is wrong. */
-  assert(len == _len);
 
   /* the position in the result */
   i = 0;
@@ -45,7 +35,7 @@ tokenize(PyObject* self, PyObject* arg)
   ttype = TS_START;
 
   /* initialize the parser with the string to parse */
-  init_parser(&pst, (jchar*)str, (int)len);
+  init_parser(&pst, str, (int)len);
 
   /* allocate memory for temporary array of integers */
   int* spaces = (int*)malloc(sizeof(int*) * (size_t)len);
@@ -116,14 +106,10 @@ MakeLists:
 
   /* populate the lists */
   for (y = 0; y < i; y++) {
-    // TEST. (it's faster, so i should rebuild all that stuff)
-    // PyObject* word = PyUnicode_New(lens[y], 1114111);
-    // for (int i = 0; i < lens[y]; i++)
-    //   PyUnicode_WriteChar(word, i, 'C');
-    // PyList_SET_ITEM(list_words, y, word);
-
-    PyList_SET_ITEM(
-      list_words, y, PyUnicode_FromWideChar(&pst.str[idx[y]], lens[y]));
+    PyList_SET_ITEM(list_words,
+      y,
+      PyUnicode_FromKindAndData(
+        PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]));
     PyList_SET_ITEM(list_spaces, y, PyLong_FromLong(spaces[y]));
     PyList_SET_ITEM(list_types, y, PyLong_FromLong(types[y]));
   }
@@ -139,7 +125,6 @@ MakeLists:
 FreeEnd:
 
   /* free memory for the parser and for the wchar_t* string */
-  free(str);
   free(spaces);
   free(idx);
   free(lens);
