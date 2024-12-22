@@ -237,14 +237,13 @@ const suffix* const suff_plural_nonbinary[] = {
 
 /* feminine suffixes */
 const suffix suff_feminine[] = {
-#define N_SUFF_FEMININE 16
+#define N_SUFF_FEMININE 15
 #define xs 2, suff_plural_nonbinary
   { L"e", 1, xs },
   { L"te", 2, xs },
   { L"euse", 4, xs },
   { L"ese", 3, xs },
   { L"ère", 3, xs },
-  { L"Ère", 3, xs },
   { L"ice", 3, xs },
   { L"rice", 4, xs },
   { L"trice", 5, xs },
@@ -256,6 +255,7 @@ const suffix suff_feminine[] = {
   { L"se", 2, xs },
   { L"fe", 2, xs },
   // { U"le", 2, xs }, // would requires condition BEFORE
+  // { L"Ère", 3, xs }, // was for char*
 #undef xs
 };
 
@@ -350,7 +350,7 @@ iswordch(wchar_t c)
 {
   wint_t c2 = (wint_t)c;
   return (
-    iswalpha(c2) || c == L'·' || (!iswcntrl(c2) && !iswprint(c2)));
+    iswalpha(c2) || c == L'·');
 }
 
 /* classify a character */
@@ -434,9 +434,10 @@ match_suff(wchar_t* str, const suffix* suffix, int max, wchar_t sep)
   /* ensure all the characters from the suffixes are in the string
    */
   for (i = 0; i < suffix->len; i++) {
-    // TODO: do not compare twice.
-    if (!(str[i] == suffix->str[i] ||
-          towlower((wint_t)str[i]) == (wint_t)suffix->str[i]))
+    // TODO: there's probably a simplier way.
+    // if (iswupper((wint_t)str[i]) ? (wchar_t)towlower((wint_t)str[i])
+    //                              : str[i] != suffix->str[i])
+    if (towlower((wint_t)str[i]) != (wint_t)suffix->str[i])
       return NULL;
   }
 
@@ -757,6 +758,8 @@ parse_word(TParser* pst)
           pst->_next = TS_WORD;
           return TS_WORD;
         }
+        // TODO: no need to check for inclusive suffix
+        // if not JUSQUCI_TRACK
         /* lecteur-rice-s */
         else if ((len = is_incl_suff(pst, c))) {
 #ifdef JUSQUCI_TRACK

@@ -15,9 +15,10 @@ jusqucy.so: ../parser.c jusqucy.c
 presqucy.so: presqucy.c
 	$(CC) $(CC_FLAGS) presqucy.c -o $@
 
-test: presqucy.so
-	python3 -c "import presqucy; print(presqucy.normalize('auteur.rice.xs?'))"
-	python3 -c "import presqucy; print(presqucy.normalize('a'))"
+test: presqucy.so jusqucy.so
+	python3 -c "import jusqucy; print(jusqucy.tokenize('a'))"
+	python3 -c "import presqucy; print(presqucy.norm('a'))"
+	python3 -c "import presqucy; print(presqucy.norm('AUTEUR.RICE.XS?'))"
 
 clean:
 	rm -f *.so *.o

@@ -117,8 +117,14 @@ MakeLists:
 
   /* populate the lists */
   for (y = 0; y < i; y++) {
-    PyList_SET_ITEM(
-      list_words, y, PyUnicode_FromWideChar(&pst.str[idx[y]], lens[y]));
+    // TEST. (it's faster, so i should rebuild all that stuff)
+    // PyObject* word = PyUnicode_New(lens[y], 1114111);
+    // for (int i = 0; i < lens[y]; i++)
+    //   PyUnicode_WriteChar(word, i, 'C');
+    // PyList_SET_ITEM(list_words, y, word);
+
+    // PyList_SET_ITEM(
+    //   list_words, y, PyUnicode_FromWideChar(&pst.str[idx[y]], lens[y]));
     PyList_SET_ITEM(list_spaces, y, PyLong_FromLong(spaces[y]));
     PyList_SET_ITEM(list_types, y, PyLong_FromLong(types[y]));
   }

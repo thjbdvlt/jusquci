@@ -36,9 +36,15 @@ select to_tsvector(
 );
 ```
 
-## with spacy
+## in python
 
-the tokenizer can also be used in a spacy pipeline.
+the single provided function (`tokenize`) returns three lists:
+
+- __tokens__: a list of strings.
+- __tokens types__: a list of token types ID; the types are defined as an *Enum* (`jusqucy.ttypes.TokenType`).
+- __spaces__: a list of boolean values that indicates if tokens are followed by a space or not (for spaCy, mostly).
+
+the tokenizer can be used in a spacy pipeline. it tokenizes the text and add a attribute to the resulting `Doc` object, `Doc._.ttypes` in which are store token types (assigning to each token takes much more time).
 
 ```python
 import spacy
@@ -51,6 +57,14 @@ nlp.tokenizer = jusqucy.JusqucyTokenizer(nlp.vocab)
 nlp = spacy.load(your_model, config={
     "nlp": {"tokenizer": {"@tokenizers": "jusqucy_tokenizer"}}
 })
+```
+
+to get the token types:
+
+```python
+from jusqucy.ttypes import TokenType
+for token, ttype in zip(doc, doc._.ttypes):
+    print(token, TokenType[ttype])
 ```
 
 ## as a command line tool
