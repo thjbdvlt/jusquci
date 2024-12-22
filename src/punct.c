@@ -49,8 +49,8 @@ is_arrow(TParser* pst)
   while (i < remain && p[i] == c)
     i++;
   if (remain - i && p[i] == '>')
-    return i;
-  return i - 1;
+    return i+1;
+  return i ;
 }
 
 /* (socio)anthropologique */
