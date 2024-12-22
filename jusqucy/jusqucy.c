@@ -1,6 +1,7 @@
 #define PY_SSIZE_T_CLEAN
-#include "../parser.h"
 #include <Python.h>
+
+#include "../parser.h"
 
 static PyObject*
 tokenize(PyObject* self, PyObject* arg)
@@ -20,7 +21,6 @@ tokenize(PyObject* self, PyObject* arg)
   }
 
   /* get its length */
-  len = PyUnicode_GetLength(input);
   if ((len = PyUnicode_GetLength(input)) == -1) {
     PyErr_BadArgument();
     return NULL;
@@ -48,10 +48,10 @@ tokenize(PyObject* self, PyObject* arg)
   init_parser(&pst, str, (int)len);
 
   /* allocate memory for temporary array of integers */
-  int* spaces = (int*)malloc(sizeof(int*) * len);
-  int* idx = (int*)malloc(sizeof(int*) * len);
-  int* lens = (int*)malloc(sizeof(int*) * len);
-  int* types = (int*)malloc(sizeof(int*) * len);
+  int* spaces = (int*)malloc(sizeof(int*) * (size_t)len);
+  int* idx = (int*)malloc(sizeof(int*) * (size_t)len);
+  int* lens = (int*)malloc(sizeof(int*) * (size_t)len);
+  int* types = (int*)malloc(sizeof(int*) * (size_t)len);
 
   /* ensure that memory has been allocated */
   if (!spaces || !idx || !lens || !types) {

@@ -79,6 +79,7 @@ normalize_inclusive_suffix(wchar_t* s, int suffstart, int suffend, int len)
   return len;
 }
 
+
 int
 normalize(TParser* pst, wchar_t* normstr, int ttype)
 {
@@ -132,11 +133,16 @@ normalize(TParser* pst, wchar_t* normstr, int ttype)
         break;
       case L'‘':
       case L'’':
-        p[i] = L'\'';
+        new[y] = L'\'';
+        y++;
         break;
       // noooooooo ligatures... add something, so i'm all wrong
       // in the end....
       // but i could do this later, after all!
+      //
+      //
+      case L'œ':
+      case L'æ':
     }
   }
 

@@ -237,10 +237,9 @@ const suffix* const suff_plural_nonbinary[] = {
 
 /* feminine suffixes */
 const suffix suff_feminine[] = {
-#define N_SUFF_FEMININE 17
+#define N_SUFF_FEMININE 16
 #define xs 2, suff_plural_nonbinary
   { L"e", 1, xs },
-  { L"le", 2, xs },
   { L"te", 2, xs },
   { L"euse", 4, xs },
   { L"ese", 3, xs },
@@ -256,6 +255,7 @@ const suffix suff_feminine[] = {
   { L"oresse", 6, xs },
   { L"se", 2, xs },
   { L"fe", 2, xs },
+  // { U"le", 2, xs }, // would requires condition BEFORE
 #undef xs
 };
 
@@ -434,6 +434,7 @@ match_suff(wchar_t* str, const suffix* suffix, int max, wchar_t sep)
   /* ensure all the characters from the suffixes are in the string
    */
   for (i = 0; i < suffix->len; i++) {
+    // TODO: do not compare twice.
     if (!(str[i] == suffix->str[i] ||
           towlower((wint_t)str[i]) == (wint_t)suffix->str[i]))
       return NULL;
