@@ -6,9 +6,9 @@
 static PyObject*
 tokenize(PyObject* self, PyObject* arg)
 {
-  TParser pst;          /* parser */
-  Py_ssize_t len, _len; /* len of input string */
-  int i, y, ttype; /* for iterations */
+  TParser pst;           /* parser */
+  Py_ssize_t len, _len;  /* len of input string */
+  int i, y, ttype;       /* for iterations */
   PyObject *input, *ret; /* input value and output values */
   PyObject *list_words, *list_types, *list_spaces; /* lists */
 
@@ -107,7 +107,8 @@ MakeLists:
 
   /* populate the lists */
   for (y = 0; y < i; y++) {
-    PyObject* word = PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]);
+    PyObject* word = PyUnicode_FromKindAndData(
+      PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]);
     PyObject* space = PyLong_FromLong(spaces[y]);
     PyObject* ttype = PyLong_FromLong(types[y]);
     PyList_SET_ITEM(list_words, y, word);
