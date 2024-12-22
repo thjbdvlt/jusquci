@@ -93,32 +93,33 @@ MakeLists:
 
   /* make the python objects: three lists.*/
   list_words = PyList_New(i);
-  list_types = PyList_New(i);
+  // list_types = PyList_New(i);
   list_spaces = PyList_New(i);
 
-  if (!list_words || !list_types || !list_words) {
-    ret = PyErr_NoMemory();
-    Py_XDECREF(list_types);
-    Py_XDECREF(list_words);
-    Py_XDECREF(list_spaces);
-    goto FreeEnd;
-  }
+  // if (!list_words || !list_types || !list_words) {
+  //   ret = PyErr_NoMemory();
+  //   Py_XDECREF(list_types);
+  //   Py_XDECREF(list_words);
+  //   Py_XDECREF(list_spaces);
+  //   goto FreeEnd;
+  // }
+
 
   /* populate the lists */
   for (y = 0; y < i; y++) {
     PyList_SET_ITEM(list_words,
       y,
-      PyUnicode_FromKindAndData(
-        PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]));
+      PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]));
     PyList_SET_ITEM(list_spaces, y, PyLong_FromLong(spaces[y]));
-    PyList_SET_ITEM(list_types, y, PyLong_FromLong(types[y]));
+    // PyList_SET_ITEM(list_types, y, PyLong_FromLong(types[y]));
   }
 
   /* build the final tuple */
-  ret = PyTuple_Pack(3, list_words, list_types, list_spaces);
+  // ret = PyTuple_Pack(3, list_words, list_types, list_spaces);
+  ret = PyTuple_Pack(3, list_words, PyLong_FromLong(2), list_spaces);
 
   /* decrement reference count of each list. */
-  Py_DECREF(list_types);
+  // Py_DECREF(list_types);
   Py_DECREF(list_words);
   Py_DECREF(list_spaces);
 
