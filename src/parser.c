@@ -210,6 +210,8 @@ parse_digit(TParser* pst)
       case '+':
       case '=':
       case '*':
+      case 'k':
+      case 'x':
         tryord = 0;
         break;
       default:
