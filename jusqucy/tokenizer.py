@@ -47,7 +47,7 @@ class JusqucyTokenizer:
         pass
 
     def from_disk(self, path, *, exclude=tuple(), **kwargs):
-        self().__init__()
+        super().__init__()
 
 
 @registry.tokenizers("jusqucy_tokenizer")
