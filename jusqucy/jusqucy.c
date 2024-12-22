@@ -45,7 +45,8 @@ tokenize(PyObject* self, PyObject* arg)
 
   /* ensure that memory has been allocated */
   if (!spaces || !idx || !lens || !types) {
-    free(str);
+    // free(str);
+    PyMem_FREE(str);
     return PyErr_NoMemory();
   }
 
@@ -93,39 +94,42 @@ MakeLists:
 
   /* make the python objects: three lists.*/
   list_words = PyList_New(i);
-  // list_types = PyList_New(i);
+  list_types = PyList_New(i);
   list_spaces = PyList_New(i);
 
-  // if (!list_words || !list_types || !list_words) {
-  //   ret = PyErr_NoMemory();
-  //   Py_XDECREF(list_types);
-  //   Py_XDECREF(list_words);
-  //   Py_XDECREF(list_spaces);
-  //   goto FreeEnd;
-  // }
-
+  if (!list_words || !list_types || !list_words) {
+    ret = PyErr_NoMemory();
+    Py_XDECREF(list_types);
+    Py_XDECREF(list_words);
+    Py_XDECREF(list_spaces);
+    goto FreeEnd;
+  }
 
   /* populate the lists */
   for (y = 0; y < i; y++) {
-    PyList_SET_ITEM(list_words,
-      y,
-      PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]));
-    PyList_SET_ITEM(list_spaces, y, PyLong_FromLong(spaces[y]));
-    // PyList_SET_ITEM(list_types, y, PyLong_FromLong(types[y]));
+    PyObject* word = PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]);
+    PyObject* space = PyLong_FromLong(spaces[y]);
+    PyObject* ttype = PyLong_FromLong(types[y]);
+    PyList_SET_ITEM(list_words, y, word);
+    PyList_SET_ITEM(list_spaces, y, space);
+    PyList_SET_ITEM(list_types, y, ttype);
+    Py_DECREF(space);
+    Py_DECREF(ttype);
   }
 
   /* build the final tuple */
-  // ret = PyTuple_Pack(3, list_words, list_types, list_spaces);
-  ret = PyTuple_Pack(3, list_words, PyLong_FromLong(2), list_spaces);
+  ret = PyTuple_Pack(3, list_words, list_types, list_spaces);
 
   /* decrement reference count of each list. */
-  // Py_DECREF(list_types);
+  Py_DECREF(list_types);
   Py_DECREF(list_words);
   Py_DECREF(list_spaces);
 
 FreeEnd:
 
-  /* free memory for the parser and for the wchar_t* string */
+  PyMem_FREE(str);
+
+  /* free memory for the parser and for the jchar* string */
   free(spaces);
   free(idx);
   free(lens);
