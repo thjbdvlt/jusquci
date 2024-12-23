@@ -19,3 +19,6 @@ class TokenType(Enum):
     ORDINAL = 13
     NEWLINE = 14
     SPACESIGN = 15
+
+
+TokenType["PUNCTSTRONG"].value

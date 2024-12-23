@@ -90,7 +90,7 @@ const suffix inversion[] = {
  * because those are words!
  */
 const prefixes abbrev[] = {
-#define N_ABBREV 17
+#define N_ABBREV 20
 #define LEN_ABBREV_MAX 4
   { NULL, 0 },
   { U"ch", 2 },
@@ -110,6 +110,9 @@ const prefixes abbrev[] = {
   { U"pp", 2 },
   { U"tel", 3 },
   { U"tél", 3 },
+  { U"dr", 2 },
+  { U"mme", 2 },
+  { U"mr", 2 },
   { NULL, 0 },
 };
 

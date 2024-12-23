@@ -8,7 +8,8 @@ from .jusqucy import tokenize
 
 if not Token.has_extension("jusqucy_ttype"):
     Token.set_extension(
-        "jusqucy_ttype", getter=lambda token: token.doc[token.i]
+        "jusqucy_ttype",
+        getter=lambda token: token.doc._.jusqucy_ttypes[token.i],
     )
 
 if not Doc.has_extension("jusqucy_ttypes"):
@@ -36,12 +37,18 @@ class JusqucyTokenizer:
             words=words,
             spaces=spaces,
             vocab=self.vocab,
-            user_data={"jusqucy_ttypes": ttypes},
             **kwargs,
         )
 
+        # add the token types
+        doc._.jusqucy_ttypes = ttypes
+
         # returns the Doc
         return doc
+
+    def pipe(self, texts, batch_size=1000):
+        for i in texts:
+            yield self(i)
 
     def to_disk(self, path, *, exclude=tuple(), **kwargs):
         pass
@@ -52,7 +59,7 @@ class JusqucyTokenizer:
 
 @registry.tokenizers("jusqucy_tokenizer")
 def create_jusqucy_tokenizer():
-    def make_toquenizer(nlp):
+    def make_tokenizer(nlp):
         return JusqucyTokenizer(nlp.vocab)
 
-    return make_toquenizer
+    return make_tokenizer

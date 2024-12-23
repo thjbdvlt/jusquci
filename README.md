@@ -67,6 +67,12 @@ for token, ttype in zip(doc, doc._.ttypes):
     print(token, TokenType[ttype])
 ```
 
+these token types could be used to sentencize the text, so there is also a simple pipeline component named `jusqucy_sentencizer` that does that. it marks tokens following a strong punctuation, a newline, an emoticon or an emoji as `is_sent_start`.
+
+```python
+nlp.add_pipe('jusqucy_sentencizer')
+```
+
 ## as a command line tool
 
 to use __jusquci__ as a simple command line tokenizer (that reads from `stdin`), just compile it with the makefile in the `cli` directory.
