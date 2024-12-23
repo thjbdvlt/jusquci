@@ -182,7 +182,6 @@ int
 parse_digit(TParser* pst)
 {
   jchar c;
-  int remain = (pst->strlen - pst->pos) - 1;
   int tryord = 1; /* start at 1, cause number starts with digit */
   size_t lenord = 0;
 
@@ -228,9 +227,9 @@ EndDigit:
     return TS_NUMBER;
 
   lenord = cmpiany(
-    &pst->str[pst->pos], suff_ord, (size_t)remain, N_SUFF_ORD);
+    &pst->str[pst->pos], suff_ord, (size_t)(pst->strlen-i), N_SUFF_ORD);
   if (lenord) {
-    pst->pos += lenord;
+    pst->pos += (int)lenord;
     return TS_ORDINAL;
   }
 
@@ -288,13 +287,13 @@ get_token(TParser* pst)
     /* periodcentered is a punct sign unless it's inside a word */
     case L'·':
       ttype = TS_PUNCT;
-      chtype = Ch_PunctSoft;
+      chtype = Ch_Punct;
       pst->pos++;
       goto EndToken;
       break;
 
     case L':':
-      chtype = Ch_PunctSoft;
+      chtype = Ch_PunctEndSent;
       /* :happy: */
       if ((tlen = is_emoji(pst))) {
         ttype = TS_EMOJI;
@@ -305,14 +304,28 @@ get_token(TParser* pst)
         pst->pos += tlen;
         /* default usage */
       } else {
-        ttype = TS_PUNCT;
+        ttype = TS_PUNCTSTRONG;
+        pst->pos++;
+      }
+      goto EndToken;
+      break;
+
+    case L';':
+      /* :-) */
+      chtype = Ch_PunctEndSent;
+      if ((tlen = is_side_emoticon(pst, 1))) {
+        ttype = TS_EMOTICON;
+        pst->pos += tlen;
+        /* default usage */
+      } else {
+        ttype = TS_PUNCTSTRONG;
         pst->pos++;
       }
       goto EndToken;
       break;
 
     case L'=':
-      chtype = Ch_PunctSoft;
+      chtype = Ch_Punct;
       ttype = TS_PUNCT;
       /* =) */
       if ((tlen = is_side_emoticon(pst, 1))) {
@@ -330,7 +343,7 @@ get_token(TParser* pst)
       break;
 
     case L'^':
-      chtype = Ch_PunctSoft;
+      chtype = Ch_Punct;
       /* ^^ */
       if ((tlen = is_emoticon_super(pst))) {
         ttype = TS_EMOTICON;
@@ -349,7 +362,7 @@ get_token(TParser* pst)
       if ((tlen = is_face_emoticon(pst)) ||
           ((tlen = is_side_emoticon(pst, 1)))) {
         ttype = TS_EMOTICON;
-        chtype = Ch_PunctSoft;
+        chtype = Ch_Punct;
         pst->pos += tlen;
         goto EndToken;
       } else {
@@ -367,7 +380,7 @@ get_token(TParser* pst)
       /* v.v ô.ô O_o */
       if ((tlen = is_face_emoticon(pst))) {
         ttype = TS_EMOTICON;
-        chtype = Ch_PunctSoft;
+        chtype = Ch_Punct;
         pst->pos += tlen;
         goto EndToken;
       } else {
@@ -384,7 +397,7 @@ get_token(TParser* pst)
         pst->pos += tlen;
         goto EndToken;
       }
-      chtype = is_intrapar_start(pst, c) ? Ch_Word : Ch_PunctSoft;
+      chtype = is_intrapar_start(pst, c) ? Ch_Word : Ch_Punct;
       break;
 
     case L'h':
@@ -400,8 +413,8 @@ get_token(TParser* pst)
       break;
 
     case L'-':
-      chtype = Ch_PunctSoft;
-      ttype = Ch_PunctSoft;
+      chtype = Ch_Punct;
+      ttype = Ch_Punct;
       /* -je */
       if (pst->_next == TS_WORD) {
         pst->_next = TS_START;
@@ -435,7 +448,7 @@ get_token(TParser* pst)
 
     case Ch_Ctrl:
     case Ch_Space:
-    case Ch_PunctStrong:
+    case Ch_PunctEndSent:
       ttype = chtype;
       while (pst->pos < pst->strlen &&
              getchtype(pst->str[pst->pos]) == chtype)
@@ -448,7 +461,7 @@ get_token(TParser* pst)
       parse_citekey(pst);
       break;
 
-    case Ch_PunctSoft:
+    case Ch_Punct:
     default:
       pst->pos++;
       ttype = TS_PUNCT;

@@ -1,5 +1,5 @@
 [project]
-name = "jusquCy"
+name = "jusqucy"
 authors = [{name="thjbdvlt"}]
 version = "0.1.0"
 description = "tokenizer for french written in C."

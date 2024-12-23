@@ -140,10 +140,64 @@ FreeEnd:
   return ret;
 }
 
+
+static PyObject*
+get_ttype_norm(PyObject* self, PyObject* arg)
+{
+
+  int ttype; /* input value */
+  PyObject *res; /* output values */
+  Py_UCS4* norm = U""; /* default norm is no norm */
+  Py_ssize_t len = 0; /* default norm len is 0 */
+
+  /* get the input value */
+  if (!PyArg_Parse(arg, "i:ttype", &ttype)) {
+    PyErr_BadArgument();
+    return NULL;
+  }
+
+  switch (ttype) {
+
+    /* normalize emoticon, emoji and url as "." */
+    case TS_EMOTICON:
+    case TS_EMOJI:
+    case TS_URL:
+      norm = U".";
+      len = 1;
+      break;
+
+    /* normalize any number as "2" */
+    case TS_NUMBER:
+      norm = U"2";
+      len = 1;
+      break;
+
+    /* normalize ordinal like "412ème" as "2ème" */
+    case TS_ORDINAL:
+      norm = U"2ème";
+      len = 4;
+      break;
+
+    default:
+      break;
+  }
+
+  if (!len)
+    /* return 0 if not emoticon/emoji/url/number/ordinal */
+    res = PyLong_FromLong(0);
+  else 
+
+    /* return the replacement string */
+    res = PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, norm, len);
+
+  return res;
+}
+
 /* informations about the module, so it can be called from within
  * python. */
 static PyMethodDef jusqucy_methods[] = {
   { "tokenize", tokenize, METH_O, "Tokenize a text." },
+  { "get_ttype_norm", get_ttype_norm, METH_O, "" },
   { NULL, NULL, 0, NULL }
 };
 

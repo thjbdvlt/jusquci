@@ -58,7 +58,7 @@ class JusqucyTokenizer:
 
 
 @registry.tokenizers("jusqucy_tokenizer")
-def create_jusqucy_tokenizer():
+def create_tokenizer():
     def make_tokenizer(nlp):
         return JusqucyTokenizer(nlp.vocab)
 
