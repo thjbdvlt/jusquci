@@ -6,6 +6,9 @@ setup(
         "spacy_tokenizers": [
             "jusqucy_tokenizer = jusqucy.tokenizer:create_tokenizer"
         ],
-        "spacy_factories": ["jusqucy_sentencizer = jusqucy.sentencizer:sentencize"]
+        "spacy_factories": [
+            "jusqucy_sentencizer = jusqucy.sentencizer:sentencize",
+            "jusqucy_normalizer = jusqucy.normalizer:normalize",
+        ],
     },
 )
