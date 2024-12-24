@@ -230,6 +230,9 @@ EndDigit:
     &pst->str[pst->pos], suff_ord, (size_t)(pst->strlen-i), N_SUFF_ORD);
   if (lenord) {
     pst->pos += (int)lenord;
+    // TEST
+    if (pst->str[pst->pos] == L's')
+      pst->pos++;
     return TS_ORDINAL;
   }
 
