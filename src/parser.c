@@ -158,7 +158,7 @@ parse_url(TParser* pst, jchar c)
   if (pst->strlen - pst->pos < 4)
     return 0;
 
-  if (cmpi((c == L'h') ? U"http" : U"www.", x, 4) == 0) {
+  if (cmpi((c == L'h') ? U"http" : U"www.", x, 4)) {
     do {
       pst->pos++;
       c = pst->str[pst->pos];

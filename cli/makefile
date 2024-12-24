@@ -6,7 +6,8 @@ jusquci: $(SOURCES)
 	$(CC) -Wall -o jusquci $(SOURCES) $(CCFLAGS)
 
 test: jusquci
-	./jusquci < ../tests/sentences.csv
+	# ./jusquci < ../tests/sentences.csv
+	echo "humaine.e.s. ici?" | ./jusquci 
 
 valgrind: jusquci
 	valgrind --leak-check=full ./jusquci < ../tests/sentences.csv 1>/dev/null
