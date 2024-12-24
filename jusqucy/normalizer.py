@@ -12,8 +12,9 @@ def normalize(doc):
     Returns (Doc)
     """
 
-    for token, ttype in zip(doc, doc._.jusqucy_ttypes):
-        norm = get_ttype_norm(ttype)
+    for token, norm in zip(
+        doc, map(get_ttype_norm, doc._.jusqucy_ttypes)
+    ):
         if norm != 0:
             token.norm_ = norm
     return doc
