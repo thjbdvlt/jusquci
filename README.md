@@ -43,6 +43,7 @@ the single provided function (`tokenize`) returns three lists:
 - __tokens__: a list of strings.
 - __tokens types__: a list of token types ID; the types are defined as an *Enum* (`jusqucy.ttypes.TokenType`).
 - __spaces__: a list of boolean values that indicates if tokens are followed by a space or not (for spaCy, mostly).
+- __is_sent_start__: a list of boolean values that's used to set `Token.is_sent_start` (based of the __token types__).
 
 the tokenizer can be used in a spacy pipeline. it tokenizes the text and add a attribute to the resulting `Doc` object, `Doc._.ttypes` in which are store token types (assigning to each token takes much more time).
 
@@ -63,14 +64,8 @@ to get the token types:
 
 ```python
 from jusqucy.ttypes import TokenType
-for token, ttype in zip(doc, doc._.ttypes):
+for token, ttype in zip(doc, doc._.jusqucy_ttypes):
     print(token, TokenType[ttype])
-```
-
-these token types could be used to sentencize the text, so there is also a simple pipeline component named `jusqucy_sentencizer` that does that. it marks tokens following a strong punctuation, a newline, an emoticon or an emoji as `is_sent_start`.
-
-```python
-nlp.add_pipe('jusqucy_sentencizer')
 ```
 
 ## as a command line tool

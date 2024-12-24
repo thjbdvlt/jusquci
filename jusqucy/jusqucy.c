@@ -42,12 +42,10 @@ tokenize(PyObject* self, PyObject* arg)
   int* spaces = (int*)malloc(sizeof(int*) * (size_t)len);
   int* idx = (int*)malloc(sizeof(int*) * (size_t)len);
   int* lens = (int*)malloc(sizeof(int*) * (size_t)len);
-  int* types = (int*)malloc(sizeof(int*) * (size_t)len);
-  int* sent_start = (int*)malloc(sizeof(int*) * (size_t)len + 1);
+  int* _types = (int*)malloc(sizeof(int*) * (size_t)len+1);
 
   /* ensure that memory has been allocated */
-  if (!spaces || !idx || !lens || !types) {
-    // free(str);
+  if (!spaces || !idx || !lens || !_types) {
     PyMem_FREE(str);
     return PyErr_NoMemory();
   }
@@ -72,22 +70,14 @@ tokenize(PyObject* self, PyObject* arg)
   spaces[0] = 0;
   idx[0] = pst.tidx;
   lens[0] = pst.tlen;
+
+  /* types is used for two things: `ttypes` and `is_sent_start`. */
+  _types[0] = TS_NEWLINE;
+  int* types = &_types[1];
   types[0] = ttype;
-  sent_start[0] = 1;
 
-  switch (ttype) {
-    case TS_EMOTICON:
-    case TS_EMOJI:
-    case TS_URL:
-    case TS_NEWLINE:
-    case TS_PUNCTSTRONG:
-      sent_start[1] = 1;
-      break;
-    default:
-      sent_start[1] = 0;
-      break;
-  }
 
+  /* start at one */
   i = 1;
 
   /* iterates over the tokens, until it reach the end of the
@@ -103,22 +93,9 @@ tokenize(PyObject* self, PyObject* arg)
       idx[i] = pst.tidx;
       lens[i] = pst.tlen;
       types[i] = ttype;
-      switch (ttype) {
-        case TS_EMOTICON:
-        case TS_EMOJI:
-        case TS_URL:
-        case TS_NEWLINE:
-        case TS_PUNCTSTRONG:
-          sent_start[i + 1] = 1;
-          break;
-        default:
-          sent_start[i + 1] = 0;
-          break;
-      }
       i++;
     }
   }
-  printf("\n");
 
 MakeLists:
 
@@ -148,9 +125,22 @@ MakeLists:
     PyList_SET_ITEM(list_words, y, word);
     PyList_SET_ITEM(list_spaces, y, space);
     PyList_SET_ITEM(list_types, y, ttype);
-    PyList_SET_ITEM(list_sents,
-      y,
-      (sent_start[y] ? is_sent_start : isnt_sent_start));
+
+    switch (types[y-1]) {
+      case TS_EMOTICON:
+      case TS_EMOJI:
+      case TS_URL:
+      case TS_NEWLINE:
+      case TS_PUNCTSTRONG:
+        PyList_SET_ITEM(list_sents, y, is_sent_start);
+        Py_DECREF(is_sent_start); // TEST
+        break;
+      default:
+        PyList_SET_ITEM(list_sents, y, isnt_sent_start);
+        Py_DECREF(isnt_sent_start); // TEST
+        break;
+    }
+
     Py_DECREF(space);
     Py_DECREF(ttype);
   }
@@ -159,10 +149,8 @@ MakeLists:
   Py_DECREF(isnt_sent_start);
 
   /* build the final tuple */
-  // ret = PyTuple_Pack(
-  //   4, list_words, list_types, list_spaces, list_sents);
-  ret = PyTuple_Pack( // FOR TEST
-    2, list_words, list_sents);
+  ret = PyTuple_Pack(
+    4, list_words, list_types, list_spaces, list_sents);
 
   /* decrement reference count of each list. */
   Py_DECREF(list_types);
@@ -178,10 +166,8 @@ FreeEnd:
   free(spaces);
   free(idx);
   free(lens);
-  free(types);
-  free(sent_start);
+  free(_types);
 
-  /* return the nested tuples */
   return ret;
 }
 

@@ -38,9 +38,9 @@ class JusqucyTokenizer:
             spaces=spaces,
             vocab=self.vocab,
             sent_starts=sent_starts,
-            user_data={"jusqucy_ttypes": ttypes},
             **kwargs,
         )
+        doc._.jusqucy_ttypes = ttypes
 
         # returns the Doc
         return doc

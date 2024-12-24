@@ -13,11 +13,9 @@ jusqucy.so: ../src/parser.c jusqucy.c
 	$(CC) $(CC_FLAGS) $(SOURCES) -o $@
 
 test: jusqucy.so
-	python3 -c "import jusqucy; print(jusqucy.tokenize('a'))"
+	python3 -c "import jusqucy; print(jusqucy.tokenize('alors? pourquoi pas ça? oui'))"
 	python3 -c "import jusqucy; print(jusqucy.tokenize('éééte auteur·rice·x et· et les.euse.s'))"
-	python3 -c "import jusqucy; print(jusqucy.tokenize('éééte que quoi'))"
-	python3 -c "import jusqucy; print(jusqucy.tokenize('ééééte pas?'))"
-	python3 -c "import jusqucy; print(jusqucy.tokenize('maaaaais pas?'))"
+
 
 clean:
 	rm -f *.so *.o
