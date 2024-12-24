@@ -19,7 +19,6 @@ jusquci_parser_start(PG_FUNCTION_ARGS)
   TParser* pst;
   size_t len;
   char* _str;
-  // wchar_t* str;
   pg_wchar* str;
 
   // allocate memory for parser
@@ -32,15 +31,12 @@ jusquci_parser_start(PG_FUNCTION_ARGS)
   pst->_mb = 0;
 
   // get the length of the text to parse
-  // (add +1 for the terminating string.)
   len = (size_t)PG_GETARG_INT32(1);
 
   // convert to wide char.
   str = (pg_wchar*)palloc0(sizeof(pg_wchar*) * len);
 
   // convert multbytes to wide char string, and get the length
-  // here is the problem. for, e.g. "et?" it's correct (3), but for
-  // "et»" it's wrong (4); but for "ôlî" its correct, too (3).
   len = (size_t)pg_mb2wchar_with_len(_str, (pg_wchar*)str, (int)len);
 
   init_parser(pst, str, (int)len);
@@ -52,7 +48,7 @@ jusquci_parser_start(PG_FUNCTION_ARGS)
 Datum
 jusquci_parser_end(PG_FUNCTION_ARGS)
 {
-  // free memory allocated for parser: there is nothing else to do
+  // free memory allocated for parser and strings: there is nothing else to do
   TParser* pst = (TParser*)PG_GETARG_POINTER(0);
   pfree(pst->str);
   pfree(pst);

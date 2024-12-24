@@ -105,16 +105,17 @@ MakeLists:
   list_spaces = PyList_New(i);
   list_sents = PyList_New(i);
 
-  if (!list_words || !list_types || !list_words) {
+  if (!list_words || !list_types || !list_words || !list_sents) {
     ret = PyErr_NoMemory();
     Py_XDECREF(list_types);
     Py_XDECREF(list_words);
     Py_XDECREF(list_spaces);
+    Py_XDECREF(list_sents);
     goto FreeEnd;
   }
 
   PyObject* is_sent_start = PyLong_FromLong(1);
-  PyObject* isnt_sent_start = PyLong_FromLong(0);
+  PyObject* isnt_sent_start = PyLong_FromLong(-1);
 
   /* populate the lists */
   for (y = 0; y < i; y++) {
@@ -133,11 +134,11 @@ MakeLists:
       case TS_NEWLINE:
       case TS_PUNCTSTRONG:
         PyList_SET_ITEM(list_sents, y, is_sent_start);
-        Py_DECREF(is_sent_start); // TEST
+        Py_DECREF(is_sent_start);
         break;
       default:
         PyList_SET_ITEM(list_sents, y, isnt_sent_start);
-        Py_DECREF(isnt_sent_start); // TEST
+        Py_DECREF(isnt_sent_start);
         break;
     }
 
