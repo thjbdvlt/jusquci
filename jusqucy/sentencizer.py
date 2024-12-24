@@ -16,6 +16,8 @@ def sentencize(doc):
     Returns (Doc)
     """
 
+    if len(doc) == 0:
+        return doc
     doc[0].is_sent_start = True
     for token, ttype in zip(doc[1:], doc._.jusqucy_ttypes):
         token.is_sent_start = True if ttype in end_ttypes else False
