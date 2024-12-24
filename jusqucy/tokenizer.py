@@ -30,18 +30,17 @@ class JusqucyTokenizer:
         """
 
         # tokenize
-        words, ttypes, spaces = tokenize(text)
+        words, ttypes, spaces, sent_starts = tokenize(text)
 
         # build the doc
         doc = Doc(
             words=words,
             spaces=spaces,
             vocab=self.vocab,
+            sent_starts=sent_starts,
+            user_data={"jusqucy_ttypes": ttypes},
             **kwargs,
         )
-
-        # add the token types
-        doc._.jusqucy_ttypes = ttypes
 
         # returns the Doc
         return doc

@@ -10,7 +10,8 @@ tokenize(PyObject* self, PyObject* arg)
   Py_ssize_t len, _len;  /* len of input string */
   int i, y, ttype;       /* for iterations */
   PyObject *input, *ret; /* input value and output values */
-  PyObject *list_words, *list_types, *list_spaces; /* lists */
+  PyObject *list_words, *list_types, *list_spaces,
+    *list_sents; /* lists */
 
   /* get the parameter value */
   if (!PyArg_Parse(arg, "U:tokenize", &input)) {
@@ -42,6 +43,7 @@ tokenize(PyObject* self, PyObject* arg)
   int* idx = (int*)malloc(sizeof(int*) * (size_t)len);
   int* lens = (int*)malloc(sizeof(int*) * (size_t)len);
   int* types = (int*)malloc(sizeof(int*) * (size_t)len);
+  int* sent_start = (int*)malloc(sizeof(int*) * (size_t)len + 1);
 
   /* ensure that memory has been allocated */
   if (!spaces || !idx || !lens || !types) {
@@ -71,7 +73,22 @@ tokenize(PyObject* self, PyObject* arg)
   idx[0] = pst.tidx;
   lens[0] = pst.tlen;
   types[0] = ttype;
-  i++;
+  sent_start[0] = 1;
+
+  switch (ttype) {
+    case TS_EMOTICON:
+    case TS_EMOJI:
+    case TS_URL:
+    case TS_NEWLINE:
+    case TS_PUNCTSTRONG:
+      sent_start[1] = 1;
+      break;
+    default:
+      sent_start[1] = 0;
+      break;
+  }
+
+  i = 1;
 
   /* iterates over the tokens, until it reach the end of the
    * tokenized text. standard spaces are not added to the list, but
@@ -86,9 +103,22 @@ tokenize(PyObject* self, PyObject* arg)
       idx[i] = pst.tidx;
       lens[i] = pst.tlen;
       types[i] = ttype;
+      switch (ttype) {
+        case TS_EMOTICON:
+        case TS_EMOJI:
+        case TS_URL:
+        case TS_NEWLINE:
+        case TS_PUNCTSTRONG:
+          sent_start[i + 1] = 1;
+          break;
+        default:
+          sent_start[i + 1] = 0;
+          break;
+      }
       i++;
     }
   }
+  printf("\n");
 
 MakeLists:
 
@@ -96,6 +126,7 @@ MakeLists:
   list_words = PyList_New(i);
   list_types = PyList_New(i);
   list_spaces = PyList_New(i);
+  list_sents = PyList_New(i);
 
   if (!list_words || !list_types || !list_words) {
     ret = PyErr_NoMemory();
@@ -104,6 +135,9 @@ MakeLists:
     Py_XDECREF(list_spaces);
     goto FreeEnd;
   }
+
+  PyObject* is_sent_start = PyLong_FromLong(1);
+  PyObject* isnt_sent_start = PyLong_FromLong(0);
 
   /* populate the lists */
   for (y = 0; y < i; y++) {
@@ -114,17 +148,27 @@ MakeLists:
     PyList_SET_ITEM(list_words, y, word);
     PyList_SET_ITEM(list_spaces, y, space);
     PyList_SET_ITEM(list_types, y, ttype);
+    PyList_SET_ITEM(list_sents,
+      y,
+      (sent_start[y] ? is_sent_start : isnt_sent_start));
     Py_DECREF(space);
     Py_DECREF(ttype);
   }
 
+  Py_DECREF(is_sent_start);
+  Py_DECREF(isnt_sent_start);
+
   /* build the final tuple */
-  ret = PyTuple_Pack(3, list_words, list_types, list_spaces);
+  // ret = PyTuple_Pack(
+  //   4, list_words, list_types, list_spaces, list_sents);
+  ret = PyTuple_Pack( // FOR TEST
+    2, list_words, list_sents);
 
   /* decrement reference count of each list. */
   Py_DECREF(list_types);
   Py_DECREF(list_words);
   Py_DECREF(list_spaces);
+  Py_DECREF(list_sents);
 
 FreeEnd:
 
@@ -135,20 +179,20 @@ FreeEnd:
   free(idx);
   free(lens);
   free(types);
+  free(sent_start);
 
   /* return the nested tuples */
   return ret;
 }
 
-
 static PyObject*
 get_ttype_norm(PyObject* self, PyObject* arg)
 {
 
-  int ttype; /* input value */
-  PyObject *res; /* output values */
+  int ttype;           /* input value */
+  PyObject* res;       /* output values */
   Py_UCS4* norm = U""; /* default norm is no norm */
-  Py_ssize_t len = 0; /* default norm len is 0 */
+  Py_ssize_t len = 0;  /* default norm len is 0 */
 
   /* get the input value */
   if (!PyArg_Parse(arg, "i:ttype", &ttype)) {
@@ -185,10 +229,11 @@ get_ttype_norm(PyObject* self, PyObject* arg)
   if (!len)
     /* return 0 if not emoticon/emoji/url/number/ordinal */
     res = PyLong_FromLong(0);
-  else 
+  else
 
     /* return the replacement string */
-    res = PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, norm, len);
+    res =
+      PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, norm, len);
 
   return res;
 }
