@@ -42,7 +42,7 @@ tokenize(PyObject* self, PyObject* arg)
   int* spaces = (int*)malloc(sizeof(int*) * (size_t)len);
   int* idx = (int*)malloc(sizeof(int*) * (size_t)len);
   int* lens = (int*)malloc(sizeof(int*) * (size_t)len);
-  int* _types = (int*)malloc(sizeof(int*) * (size_t)len+1);
+  int* _types = (int*)malloc(sizeof(int*) * (size_t)len + 1);
 
   /* ensure that memory has been allocated */
   if (!spaces || !idx || !lens || !_types) {
@@ -76,7 +76,6 @@ tokenize(PyObject* self, PyObject* arg)
   int* types = &_types[1];
   types[0] = ttype;
 
-
   /* start at one */
   i = 1;
 
@@ -105,6 +104,9 @@ MakeLists:
   list_spaces = PyList_New(i);
   list_sents = PyList_New(i);
 
+  int* sents = (int*)malloc(sizeof(int*) * (size_t)i + 1);
+  sents[i + 1] = 0;
+
   if (!list_words || !list_types || !list_words || !list_sents) {
     ret = PyErr_NoMemory();
     Py_XDECREF(list_types);
@@ -114,36 +116,43 @@ MakeLists:
     goto FreeEnd;
   }
 
-  PyObject* is_sent_start = PyLong_FromLong(1);
-  PyObject* isnt_sent_start = PyLong_FromLong(-1);
-
   /* populate the lists */
+  int isword = 0;
   for (y = 0; y < i; y++) {
     PyObject* word = PyUnicode_FromKindAndData(
       PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]);
     PyObject* space = PyLong_FromLong(spaces[y]);
     PyObject* ttype = PyLong_FromLong(types[y]);
+
     PyList_SET_ITEM(list_words, y, word);
     PyList_SET_ITEM(list_spaces, y, space);
     PyList_SET_ITEM(list_types, y, ttype);
 
-    switch (types[y-1]) {
+    Py_DECREF(space);
+    Py_DECREF(ttype);
+
+    switch (types[y - 1]) {
       case TS_EMOTICON:
       case TS_EMOJI:
       case TS_URL:
       case TS_NEWLINE:
       case TS_PUNCTSTRONG:
-        PyList_SET_ITEM(list_sents, y, is_sent_start);
-        Py_DECREF(is_sent_start);
+        sents[y] = 1;
         break;
       default:
-        PyList_SET_ITEM(list_sents, y, isnt_sent_start);
-        Py_DECREF(isnt_sent_start);
+        sents[y] = 0;
         break;
     }
+  }
 
-    Py_DECREF(space);
-    Py_DECREF(ttype);
+  PyObject* is_sent_start = PyLong_FromLong(1);
+  PyObject* isnt_sent_start = PyLong_FromLong(-1);
+
+  for (y = 0; y < i; y++) {
+    if (sents[y] && !sents[y + 1])
+      PyList_SET_ITEM(list_sents, y, is_sent_start);
+    else
+      PyList_SET_ITEM(list_sents, y, isnt_sent_start);
   }
 
   Py_DECREF(is_sent_start);
@@ -168,6 +177,7 @@ FreeEnd:
   free(idx);
   free(lens);
   free(_types);
+  free(sents);
 
   return ret;
 }

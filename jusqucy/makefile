@@ -16,6 +16,7 @@ test: jusqucy.so
 	python3 -c "import jusqucy; print(jusqucy.tokenize('alors? pourquoi pas ça? oui'))"
 	python3 -c "import jusqucy; print(jusqucy.tokenize('éééte auteur·rice·x et· et les.euse.s'))"
 	python3 -c "import jusqucy; print(jusqucy.tokenize('les humain.e.s sont là'))"
+	python3 -c "import jusqucy; print(*jusqucy.tokenize('les autres\n\n\n...?\net qui? oui'))"
 
 
 clean:
