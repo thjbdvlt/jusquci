@@ -10,6 +10,12 @@ dependencies = []
 [project.urls]
 Homepage = "https://github.com/thjbdvlt/jusquci"
 
+[project.entry-points.spacy_tokenizers]
+jusqucy_tokenizer = "jusqucy.tokenizer:create_tokenizer"
+
+[project.entry-points.spacy_factories]
+jusqucy_normalizer = "jusqucy.normalizer:normalize",
+
 [build-system]
 requires = ["setuptools>=74.1"]
 build-backend = "setuptools.build_meta"

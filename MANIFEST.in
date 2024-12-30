@@ -1,3 +1,2 @@
 include parser.c
 include jusqucy/jusqucy.c
-# include jusqucy/jusqucy.so
