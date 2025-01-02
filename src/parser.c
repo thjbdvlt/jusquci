@@ -111,6 +111,11 @@ parse_word(TParser* pst)
         }
         break;
 
+      /* n° 47 */
+      case L'°':
+        pst->pos++;
+        return TS_ABBREV;
+
       /* jusqu' ici */
       case '\'':
       case L'’':
@@ -170,12 +175,13 @@ parse_url(TParser* pst, jchar c)
   return 0;
 }
 
-#define N_SUFF_ORD 4
+#define N_SUFF_ORD 5
 const jchar* const suff_ord[] = {
   U"ère",
   U"ème",
   U"er",
   U"e",
+  U"ᵉ",
 };
 
 int
