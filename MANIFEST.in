@@ -1,2 +1,3 @@
-include parser.c
+include src/parser.c
+include src/typifier.c
 include jusqucy/jusqucy.c

@@ -1,4 +1,4 @@
-from jusqucy.jusqucy import tokenize
+from jusqucy.jusqucy import tokenize, ttypify
 from jusqucy.ttypes import TokenType
 
 try:
