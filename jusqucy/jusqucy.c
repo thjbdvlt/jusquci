@@ -2,6 +2,7 @@
 #include <Python.h>
 
 #include "../src/parser.h"
+#include "../src/typifier.h"
 
 static PyObject*
 tokenize(PyObject* self, PyObject* arg)
@@ -199,11 +200,11 @@ get_ttype_norm(PyObject* self, PyObject* arg)
 
   switch (ttype) {
 
-    /* normalize emoticon, emoji and url as "." */
+    /* normalize emoticon, emoji and url as "@" */
     case TS_EMOTICON:
     case TS_EMOJI:
     case TS_URL:
-      norm = U".";
+      norm = U"@";
       len = 1;
       break;
 
@@ -235,11 +236,52 @@ get_ttype_norm(PyObject* self, PyObject* arg)
   return res;
 }
 
+static PyObject*
+ttypify_token(PyObject* self, PyObject* arg)
+{
+
+  PyObject *input, *ret; /* input value and output values */
+  Py_ssize_t len, _len;  /* len of input string */
+  Py_UCS4* str;
+  int ttype;
+
+  /* get the parameter value */
+  if (!PyArg_Parse(arg, "U:tokenize", &input)) {
+    PyErr_BadArgument();
+    return NULL;
+  }
+
+  /* get its length */
+  if ((len = PyUnicode_GetLength(input)) == -1) {
+    PyErr_BadArgument();
+    return NULL;
+  }
+
+  /* get the string as C string */
+  str = PyUnicode_AsUCS4Copy(input);
+  if (!str)
+    return PyErr_NoMemory();
+
+  /* get the token type as an int */
+  ttype = ttypify(str, (int)len);
+
+  /* make a python int */
+  ret = PyLong_FromLong(ttype);
+
+  /* free string */
+  PyMem_FREE(str);
+
+  /* return python int (token type ID) */
+  return ret;
+
+}
+
 /* informations about the module, so it can be called from within
  * python. */
 static PyMethodDef jusqucy_methods[] = {
   { "tokenize", tokenize, METH_O, "Tokenize a text." },
-  { "get_ttype_norm", get_ttype_norm, METH_O, "" },
+  { "get_ttype_norm", get_ttype_norm, METH_O, "Normalize a special token." },
+  { "ttypify", ttypify_token, METH_O, "Typify a token." },
   { NULL, NULL, 0, NULL }
 };
 

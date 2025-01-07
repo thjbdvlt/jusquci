@@ -9,7 +9,7 @@ OBJECTS = jusqucy.so
 
 all: jusqucy.so
 
-jusqucy.so: ../src/parser.c jusqucy.c 
+jusqucy.so: ../src/parser.c ../src/typifier.c jusqucy.c 
 	$(CC) $(CC_FLAGS) $(SOURCES) -o $@
 
 test: jusqucy.so
@@ -17,6 +17,7 @@ test: jusqucy.so
 	python3 -c "import jusqucy; print(jusqucy.tokenize('éééte auteur·rice·x et· et les.euse.s'))"
 	python3 -c "import jusqucy; print(jusqucy.tokenize('les humain.e.s sont là'))"
 	python3 -c "import jusqucy; print(*jusqucy.tokenize('les autres\n\n\n...?\net qui? oui'))"
+	python3 -c "import jusqucy; import ttypes; print([(i, ttypes.TokenType(jusqucy.ttypify(i))) for i in ('-je', '1', '.', 'jelui', 'a.', 'cool', '-', '->', 'https://', '12ème')])"
 
 
 clean:
