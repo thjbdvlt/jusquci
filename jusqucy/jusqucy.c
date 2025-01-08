@@ -200,12 +200,17 @@ get_ttype_norm(PyObject* self, PyObject* arg)
 
   switch (ttype) {
 
-    /* normalize emoticon, emoji and url as "@" */
+    /* normalize emoticon and emoji and url as ":)" */
     case TS_EMOTICON:
     case TS_EMOJI:
+      norm = U":)";
+      len = 2;
+      break;
+
+    /* normalize url as "https://" */
     case TS_URL:
-      norm = U"@";
-      len = 1;
+      norm = U"https://";
+      len = 8;
       break;
 
     /* normalize any number as "2" */
