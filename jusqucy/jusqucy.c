@@ -221,8 +221,8 @@ get_ttype_norm(PyObject* self, PyObject* arg)
 
     /* normalize ordinal like "412ème" as "2ème" */
     case TS_ORDINAL:
-      norm = U"2ème";
-      len = 4;
+      norm = U"2e";
+      len = 2;
       break;
 
     default:
