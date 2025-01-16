@@ -6,8 +6,12 @@ from spacy.tokens import Doc
 from .jusqucy import ttypify
 
 
-def get_token_type(token):
+def get_ttype(token):
     return token.doc._.jusqucy_ttypes[token.i]
+
+
+def token_isword(token):
+    return token.doc._.jusqucy_ttypes[token.i] in (2, 3, 11)
 
 
 class TokenType(Enum):
