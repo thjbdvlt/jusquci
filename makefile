@@ -1,6 +1,6 @@
 MODULE_big = jusquci
 EXTENSION = jusquci
-HEADERS = parser.h
+HEADERS = src/parser.h
 OBJS = jusquci.o src/parser.o src/affixes.o src/punct.o src/util.o
 DATA = jusquci--1.0.sql
 
