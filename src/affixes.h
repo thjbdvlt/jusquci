@@ -5,27 +5,31 @@
 #include <stdlib.h>
 
 /* structs for suffixes */
-typedef struct Suffixes
+typedef struct RecAffix
 {
   const jchar* str; /* string */
   int len;          /* length */
   int n_opts;       /* number of optional suffixes */
 
   /* self reference (-rice-x-s) */
-  const struct Suffixes* const* opts;
+  const struct RecAffix* const* opts;
 
-} suffix;
+} recaffix;
 
 /* prefixes is simplier, because have no optional parts. */
-typedef struct Prefixes
+typedef struct Affix
 {
   jchar* str;
   size_t len;
-} prefixes;
+} affix;
 
-/* match a suffix */
+/* match a recursive affix */
 jchar*
-match_suff(jchar* str, const suffix* suffix, int max, jchar sep);
+match_recaff(jchar* str, const recaffix* affix, int max, jchar sep);
+
+/* match a simple affix */
+jchar*
+match_aff(jchar* str, const recaffix* affix, int max);
 
 /* specific matching */
 int

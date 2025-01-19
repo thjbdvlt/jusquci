@@ -4,31 +4,31 @@
 #include <wctype.h>
 
 /* "-rice-s", "-rice-x", "-rice-x-s" */
-const suffix suff_plural_s = {
+const recaffix suff_plural_s = {
   U"s",
   1,
   0,
   NULL,
 };
-const suffix* const suff_plural[] = {
+const recaffix* const suff_plural[] = {
   &suff_plural_s,
 };
-const suffix suff_nonbinary_s = {
+const recaffix suff_nonbinary_s = {
   U"x",
   1,
   1,
   suff_plural,
 };
-const suffix* const suff_nonbinary[] = {
+const recaffix* const suff_nonbinary[] = {
   &suff_nonbinary_s,
 };
-const suffix* const suff_plural_nonbinary[] = {
+const recaffix* const suff_plural_nonbinary[] = {
   &suff_plural_s,
   &suff_nonbinary_s,
 };
 
 /* feminine suffixes */
-const suffix suff_feminine[] = {
+const recaffix suff_feminine[] = {
 #define N_SUFF_FEMININE 15
 #define xs 2, suff_plural_nonbinary
   { U"e", 1, xs },
@@ -50,7 +50,7 @@ const suffix suff_feminine[] = {
 };
 
 /* "peut-on", "arrivons-nous", "prends-les" */
-const suffix inversion[] = {
+const recaffix inversion[] = {
 #define N_WORD_INVERSION 28
 #define no 0, NULL
   { U"je", 2, no },
@@ -89,7 +89,7 @@ const suffix inversion[] = {
  * (because i know those). i don't include, e.g. "art.", "vol.":
  * because those are words!
  */
-const prefixes abbrev[] = {
+const affix abbrev[] = {
 #define N_ABBREV 20
 #define LEN_ABBREV_MAX 4
   { NULL, 0 },
@@ -118,7 +118,7 @@ const prefixes abbrev[] = {
 
 /* compare a string with a suffix */
 jchar*
-match_suff(jchar* str, const suffix* suffix, int max, jchar sep)
+match_recaff(jchar* str, const recaffix* affix, int max, jchar sep)
 {
 
   int i;
@@ -128,15 +128,15 @@ match_suff(jchar* str, const suffix* suffix, int max, jchar sep)
 
   /* if there is not enough space for the suffix, it does not match
    */
-  if (max < suffix->len)
+  if (max < affix->len)
     return NULL;
 
-  i = suffix->len;
+  i = affix->len;
 
   /* ensure all the characters from the suffixes are in the string
    */
-  for (i = 0; i < suffix->len; i++) {
-    if (towlower(str[i]) != suffix->str[i])
+  for (i = 0; i < affix->len; i++) {
+    if (towlower(str[i]) != affix->str[i])
       return NULL;
   }
 
@@ -169,15 +169,60 @@ match_suff(jchar* str, const suffix* suffix, int max, jchar sep)
     endptr = NULL;
 
   /* try to match every optional suffix. */
-  for (int iopt = 0; iopt < suffix->n_opts; iopt++) {
+  for (int iopt = 0; iopt < affix->n_opts; iopt++) {
 
     /* recursive call, like in "auteur-rice-x-s". */
-    x = match_suff(&str[i], suffix->opts[iopt], (max - i), sep);
+    x = match_recaff(&str[i], affix->opts[iopt], (max - i), sep);
     if (x)
       return x;
   }
 
   return endptr;
+}
+
+jchar*
+match_aff(jchar* str, const recaffix* affix, int max)
+{
+
+  int i;
+  jchar* endptr;
+  jchar c;
+
+  /* if there is not enough space for the suffix, it does not match
+   */
+  if (max < affix->len)
+    return NULL;
+
+  i = affix->len;
+
+  /* ensure all the characters from the suffixes are in the string
+   */
+  for (i = 0; i < affix->len; i++) {
+    if (towlower(str[i]) != affix->str[i])
+      return NULL;
+  }
+
+  /* pointer to the end of the string */
+  endptr = &str[i];
+
+  /* if the string reached the end, it matches */
+  if ((max - i) == 0)
+    return endptr;
+
+  /* else, get the character class of the next characters. */
+  c = str[i];
+
+  /* if the next character is not a a word character, then it's a
+   * match. and if it's not the separator, the match don't go
+   * forward, so the function can end. */
+  if (!iswordch(c))
+    return endptr;
+
+  /* if it's a word character, the match could continue, too. but if
+   * it does not, it's not a match at all.
+   */
+  else
+    return NULL;
 }
 
 /* penses-tu */
@@ -190,10 +235,14 @@ is_inversion(TParser* pst)
 
   for (int i = 0; i < N_WORD_INVERSION; i++) {
 
-    x = match_suff(p + 1, &inversion[i], remain, L'-');
+    x = match_aff(p + 1, &inversion[i], remain);
 
     if (x) {
-      return 1;
+      /* exclude "Vaison-la-Romaine". */
+      if (remain+1 > x-p && x[0] == L'-')
+        return 0;
+      else
+        return 1;
     }
   }
 
@@ -243,7 +292,7 @@ is_incl_suff(TParser* pst, jchar sep)
 
   for (int i = 0; i < N_SUFF_FEMININE; i++) {
 
-    x = match_suff(cur + 1, &suff_feminine[i], remain, sep);
+    x = match_recaff(cur + 1, &suff_feminine[i], remain, sep);
 
     if (x) {
       return (int)(x - cur);

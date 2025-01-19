@@ -7,11 +7,13 @@ jusquci: $(SOURCES)
 
 test: jusquci
 	# ./jusquci < ../tests/sentences.csv
-	echo "humaine.e.s. ici?" | ./jusquci 
+	echo "humaine.e.s. ici? entends-les; À vaison-la-romaine" | ./jusquci 
+	echo "entends-les" | ./jusquci 
 
 valgrind: jusquci
 	valgrind --leak-check=full ./jusquci < ../tests/sentences.csv 1>/dev/null
 	valgrind --leak-check=full ./jusquci < ../LICENSE 1>/dev/null
+	echo "entends-les" | valgrind --leak-check=full ./jusquci
 
 clean:
 	rm -f jusquci
