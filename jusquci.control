@@ -1,0 +1,6 @@
+# jusquci extension
+comment = 'jusquhui -- text search parser for contemporary french'
+default_version = '1.0'
+module_pathname = '$libdir/jusquci'
+relocatable = true
+superuser = true
