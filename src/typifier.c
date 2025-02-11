@@ -1,7 +1,3 @@
-// TODO: write this
-// TODO: write tests
-// TODO: test
-
 #include "parser.h"
 #include "wctype.h"
 

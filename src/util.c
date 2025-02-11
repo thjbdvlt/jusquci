@@ -34,6 +34,7 @@ getchtype(jchar c)
     case L'?':
     case L';':
     case L':':
+    case L'…':
       return Ch_PunctEndSent;
       break;
 
