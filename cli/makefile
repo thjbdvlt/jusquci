@@ -9,6 +9,10 @@ test: jusquci
 	# ./jusquci < ../tests/sentences.csv
 	echo "humaine.e.s. ici? entends-les; À vaison-la-romaine" | ./jusquci 
 	echo "entends-les" | ./jusquci 
+	echo "aaaaa(quoi)rien aaaa( aaaa(e aaaa(je croi" | ./jusquci 
+	echo "mais prêter[iez]-vous qqch à qqn? ou non[ quoi?" | ./jusquci 
+	echo "mais (quoi) (qui?) (co)mment?" | ./jusquci 
+	echo "(mais.) (mais). mais )." | ./jusquci 
 
 valgrind: jusquci
 	valgrind --leak-check=full ./jusquci < ../tests/sentences.csv 1>/dev/null
