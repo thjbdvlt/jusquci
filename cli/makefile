@@ -14,6 +14,20 @@ test: jusquci
 	echo "mais (quoi) (qui?) (co)mment?" | ./jusquci 
 	echo "(mais.) (mais). mais )." | ./jusquci 
 
+amp: jusquci
+	@echo "et&quoi? et&amp; &lg; -> &lg; a&a" | ./jusquci 
+	@echo "et&quoi? et&amp; &lg; -> être a&a" | ./jusquci 
+	@echo "et&quoi? et&amp; &lg; :: &lg; a&a" | ./jusquci 
+	@echo "yo&lg;! &lg; a&a" | ./jusquci 
+	@echo "et&amp;aaa &lg;! &lg; a&a" | ./jusquci 
+	@echo "et&amp;aaa &lg;iii &lg; a&a" | ./jusquci 
+	@echo "et&quoi? et&amp; &lg; aaa -> être a&a" | ./jusquci 
+	@echo "et&quoi? et&amp; &lg; aaa . être a&a" | ./jusquci 
+	@echo "et-> être aa" | ./jusquci 
+	@echo "&a; a.a" | ./jusquci 
+	@echo "et&quoi? et&#142; &#3; aaa . être a&a" | ./jusquci 
+	@echo "et&quoi? et&#142;! &#3;:-) aaa . être a&a" | ./jusquci 
+
 valgrind: jusquci
 	valgrind --leak-check=full ./jusquci < ../tests/sentences.csv 1>/dev/null
 	valgrind --leak-check=full ./jusquci < ../LICENSE 1>/dev/null

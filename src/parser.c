@@ -3,6 +3,7 @@
 #include "affixes.h"
 #include "parser.h"
 #include "punct.h"
+#include "html.h"
 #include "util.h"
 #include <stdlib.h>
 #include <wchar.h>
@@ -313,6 +314,19 @@ get_token(TParser* pst)
         /* default usage */
       } else {
         ttype = TS_PUNCTSTRONG;
+        pst->pos++;
+      }
+      goto EndToken;
+      break;
+
+    case L'&':
+      if ((tlen = is_html_entity(pst))) {
+        chtype = Ch_Punct;
+        ttype = TS_PUNCT;
+        pst->pos += tlen;
+      } else {
+        chtype = Ch_Word;
+        ttype = TS_WORD;
         pst->pos++;
       }
       goto EndToken;
