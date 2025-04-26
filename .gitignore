@@ -1,0 +1,16 @@
+*.bc
+*.egg-info
+*.o
+*.out
+*.so
+.suff_cache
+.tags
+.valgrind
+build
+check.sh
+compile_flags.txt
+jusquci
+tests/test.sh
+venv
+__pycache__
+.license_header*
