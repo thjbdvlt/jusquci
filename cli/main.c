@@ -5,10 +5,39 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <argp.h>
+struct arguments {
+  int newline;
+};
+const char* argp_program_version = "v0.1.0";
+static char args_doc[] = "<command> [...]";
+static char doc[] = "Tokenizer for french.";
+
+static struct argp_option options[] = {
+  { "newline", 'n', NULL, 0, "Add a newline instead of space between tokens", 0 },
+};
+
+error_t
+parse_opt(int key, char* arg, struct argp_state* state)
+{
+  struct arguments* arguments = state->input;
+  switch (key) {
+  case 'n':
+    arguments->newline = 1;
+    break;
+  default:
+    return ARGP_ERR_UNKNOWN;
+  }
+  return 0;
+};
+
+static struct argp // argument parsing
+  argp = { options, parse_opt, args_doc, doc, NULL, NULL, NULL };
+
 #define BASE_SIZE 256
 
 void
-tokenize_print(TParser* pst, jchar* text, int len)
+tokenize_print(TParser* pst, jchar* text, int len, int newline)
 {
   // init or re-init parser
   init_parser(pst, text, len);
@@ -26,11 +55,11 @@ tokenize_print(TParser* pst, jchar* text, int len)
       for (int c = 0; c < pst->tlen; c++)
         putwchar((wchar_t)pst->str[pst->tidx + c]);
 
-      putwchar(L' ');
-
-      // add a newline after strong punctuation
-      if (ttype == TS_PUNCTSTRONG)
+      if (newline)
         putwchar(L'\n');
+      else
+        putwchar(L' ');
+
     }
 
   } while (ttype != TS_END);
@@ -44,6 +73,14 @@ main(int argc, char** argv)
 {
 
   setlocale(LC_CTYPE, ""); // wide char support
+
+  struct arguments a = {
+    .newline = 0,
+  };
+  argp_parse(&argp, argc, argv, 0, 0, &a);
+  int newline = 0;
+  // if (argc && argv[1][0] == 'n')
+  //   newline = 1;
 
   TParser pst;
   init_parser(&pst, NULL, 0);
@@ -72,7 +109,7 @@ main(int argc, char** argv)
 
     // parse newline per newline
     if (c == '\n') {
-      tokenize_print(&pst, (jchar*)str, (int)index);
+      tokenize_print(&pst, (jchar*)str, (int)index, a.newline);
       index = 0;
       continue;
 

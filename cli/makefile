@@ -1,6 +1,13 @@
-CC = gcc
-SOURCES = ../src/*.c main.c
-CCFLAGS = -Wall -Wextra -Wconversion -Wno-unused-variable -Wno-unused-parameter
+PREFIX  := /usr/local/bin
+
+CC      := gcc
+SOURCES := ../src/*.c main.c
+CCFLAGS := -Wall -Wextra -Wconversion -Wno-unused-variable -Wno-unused-parameter
+
+.PHONY: install test amp valgrind clean
+
+install: jusquci
+	cp $< $(PREFIX)/
 
 jusquci: $(SOURCES)
 	$(CC) -Wall -o jusquci $(SOURCES) $(CCFLAGS)
@@ -35,5 +42,3 @@ valgrind: jusquci
 
 clean:
 	rm -f jusquci
-
-.PHONY: test clean valgrind

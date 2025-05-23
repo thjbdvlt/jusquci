@@ -81,7 +81,8 @@ a normalizer can also be used as a spacy component. it replace the `norm_` attri
 ## as a command line tool
 
 to use __jusquci__ as a simple command line tokenizer (that reads from `stdin`), just compile it with the makefile in the `cli` directory.
-the program read a text from standard input and output tokens separated by spaces. it also add newlines after strong punctuation signs (`.`, `?`, `!`).
+the program read a text from standard input and output tokens separated by spaces.
+<!--it also add newlines after strong punctuation signs (`.`, `?`, `!`). -->
 
 ## sources
 

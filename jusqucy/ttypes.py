@@ -22,3 +22,11 @@ class TokenType(Enum):
 token_types = [None] + [
     i.name.lower() for i in sorted(TokenType, key=lambda i: i.value)
 ]
+
+
+def get_ttype(token):
+    return token.doc._.jusqucy_ttypes[token.i]
+
+
+def token_isword(token):
+    return token.doc._.jusqucy_ttypes[token.i] in (2, 3, 11)

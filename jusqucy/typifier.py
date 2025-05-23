@@ -3,14 +3,6 @@ from spacy import Language
 from spacy.tokens import Doc
 
 
-def get_ttype(token):
-    return token.doc._.jusqucy_ttypes[token.i]
-
-
-def token_isword(token):
-    return token.doc._.jusqucy_ttypes[token.i] in (2, 3, 11)
-
-
 class Typifier:
     def __init__(self, nlp):
         """Initiate a Typifier.
