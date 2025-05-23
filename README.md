@@ -88,7 +88,7 @@ the program read a text from standard input and output tokens separated by space
 - [tsexample](https://github.com/postgrespro/tsexample), for the code.
 - the stopwords list is the concatenation of postgresql default stopwords for french (`french.stop`) and a list establish by Jacques Savoy[^Savoy]. I've also added a few words: *elised* words with apostrophe (e.g. `c'`), to be consistent with the `jusquci` parser (postgresql doesn't include the apostrophe), and non-binary pronouns (e.g. `iel`, `celleux`).
 
-[^Savoy]: *A stemming procedure and stopword list for general french corpora*, Jacques Savoy, Institut interfacultaire d'informatique, *Journal of the American Society for Information Science*, 50(10), 1999, 944-952. I removed a word from this list: `passé`.
+[^Savoy]: «A stemming procedure and stopword list for general french corpora», Jacques Savoy, Institut interfacultaire d'informatique, *Journal of the American Society for Information Science*, 50(10), 1999, 944-952. I removed a word from this list: `passé`.
 
 ## os
 
