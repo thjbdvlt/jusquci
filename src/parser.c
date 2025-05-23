@@ -1,9 +1,9 @@
 /* jusquci -- french tokenizer. */
 
 #include "affixes.h"
+#include "html.h"
 #include "parser.h"
 #include "punct.h"
-#include "html.h"
 #include "util.h"
 #include <stdlib.h>
 #include <wchar.h>
