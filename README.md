@@ -49,10 +49,10 @@ the tokenizer can be used in a spacy pipeline. it tokenizes the text and add a a
 
 ```python
 import spacy
-import jusqucy
+import jusqucy.tokenizer
 
 nlp = spacy.blank('fr')
-nlp.tokenizer = jusqucy.JusqucyTokenizer(nlp.vocab)
+nlp.tokenizer = jusqucy.tokenizer.JusqucyTokenizer(nlp.vocab)
 
 # or:
 nlp = spacy.load(your_model, config={
