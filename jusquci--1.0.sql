@@ -1,5 +1,5 @@
 -- complain if script is sourced in psql, rather than via CREATE EXTENSION
-\echo Use "CREATE EXTENSION pair" to load this file. \quit
+\echo Use "CREATE EXTENSION jusquci" to load this file. \quit
 
 CREATE OR REPLACE FUNCTION jusquci_parser_start (internal, int)
     RETURNS internal

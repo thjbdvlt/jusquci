@@ -15,6 +15,7 @@ jusqucy_tokenizer = "jusqucy.tokenizer:create_tokenizer"
 
 [project.entry-points.spacy_factories]
 jusqucy_normalizer = "jusqucy.normalizer:normalize"
+jusqucy_typifier = "jusqucy.typifier:create_typifier"
 
 [build-system]
 requires = ["setuptools>=74.1"]
