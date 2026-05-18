@@ -1,0 +1,13 @@
+[package]
+name = "jusquci-rs"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+libc = "0.2.186"
+locale-settings = "0.3.0"
+locale-types = "0.4.0"
+widestring = "1.2.1"
+
+[build-dependencies]
+cc = "1.2.62"

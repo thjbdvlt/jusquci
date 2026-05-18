@@ -1,4 +1,4 @@
-__jusquci__ -- tokenizer for french (PostgreSQL/spaCy).
+__jusquci__ -- tokenizer for french.
 
 | text                    | tokens                      |
 | ----------------------- | --------------------------- |
@@ -83,6 +83,8 @@ a normalizer can also be used as a spacy component. it replace the `norm_` attri
 to use __jusquci__ as a simple command line tokenizer (that reads from `stdin`), just compile it with the makefile in the `cli` directory.
 the program read a text from standard input and output tokens separated by spaces.
 <!--it also add newlines after strong punctuation signs (`.`, `?`, `!`). -->
+
+## rust
 
 ## sources
 

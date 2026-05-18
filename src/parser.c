@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include <wctype.h>
+#include <locale.h>
 
 /* these functions modify TParser values (especially `pos`) and
  * returns the token type (word, url, digit, ordinal, ...).
@@ -20,6 +21,13 @@ void
 parse_citekey(TParser* pst);
 int
 parse_digit(TParser* pst);
+
+TParser
+new_parser() {
+  setlocale(LC_CTYPE, "");
+  TParser pst;
+  return pst;
+}
 
 /* initialize values for a parser. */
 void

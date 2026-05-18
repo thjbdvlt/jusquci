@@ -6,11 +6,11 @@ CCFLAGS := -Wall -Wextra -Wconversion -Wno-unused-variable -Wno-unused-parameter
 
 .PHONY: install test amp valgrind clean
 
-install: jusquci
-	cp $< $(PREFIX)/
-
 jusquci: $(SOURCES)
 	$(CC) -Wall -o jusquci $(SOURCES) $(CCFLAGS)
+
+install: jusquci
+	cp $< $(PREFIX)/
 
 test: jusquci
 	# ./jusquci < ../tests/sentences.csv

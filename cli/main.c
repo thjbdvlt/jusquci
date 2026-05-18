@@ -78,9 +78,6 @@ main(int argc, char** argv)
     .newline = 0,
   };
   argp_parse(&argp, argc, argv, 0, 0, &a);
-  int newline = 0;
-  // if (argc && argv[1][0] == 'n')
-  //   newline = 1;
 
   TParser pst;
   init_parser(&pst, NULL, 0);

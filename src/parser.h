@@ -34,6 +34,7 @@ typedef struct
 // main functions
 int get_token(TParser* pst);
 void init_parser(TParser* pst, jchar* str, int len);
+TParser new_parser();
 
 // token types identifiers
 #define TS_ANY -2

@@ -14,3 +14,6 @@ tests/test.sh
 venv
 __pycache__
 .license_header*
+target
+rust-analyzer
+*.lock
