@@ -1,3 +1,5 @@
+use serde::{Serialize, Deserialize};
+
 pub mod parser;
 
 unsafe extern "C" {
@@ -14,17 +16,25 @@ pub fn setlocale() {
     }
 }
 
-#[derive(Debug)]
+/// a token
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Token {
+    /// the token type
     pub ttype: i32,
+    /// the token text
     pub ttext: String,
-    // chars
+    /// the token char index
     pub cindex: usize,
+    /// the number of chars in the token
     pub clen: usize,
-    // bytes
+    /// the token byte index
     pub bindex: usize,
+    /// the number of bytes in the token
     pub blen: usize,
 }
+
+/// a parsed text
+pub type Document = Vec<Token>;
 
 pub fn tokenize(s: &str) -> Vec<Token> {
     // TODO: no unwrap
