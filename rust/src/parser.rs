@@ -23,18 +23,18 @@ pub type jchar = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct TParser {
-    pub str_: *mut jchar,
-    pub strlen: ::std::os::raw::c_int,
-    pub pos: ::std::os::raw::c_int,
+    str_: *mut jchar,
+    strlen: ::std::os::raw::c_int,
+    pos: ::std::os::raw::c_int,
     pub tlen: ::std::os::raw::c_int,
     pub tidx: ::std::os::raw::c_int,
     pub ttype: ::std::os::raw::c_int,
-    pub _str: *mut ::std::os::raw::c_char,
-    pub _mb: ::std::os::raw::c_int,
-    pub _pos: ::std::os::raw::c_int,
-    pub _len: ::std::os::raw::c_int,
-    pub _next: ::std::os::raw::c_int,
-    pub _prev: ::std::os::raw::c_int,
+    _str: *mut ::std::os::raw::c_char,
+    _mb: ::std::os::raw::c_int,
+    _pos: ::std::os::raw::c_int,
+    _len: ::std::os::raw::c_int,
+    _next: ::std::os::raw::c_int,
+    _prev: ::std::os::raw::c_int,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {

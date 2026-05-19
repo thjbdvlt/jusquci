@@ -1,4 +1,4 @@
-mod parser;
+pub mod parser;
 
 unsafe extern "C" {
     fn new_parser() -> parser::TParser;
@@ -7,6 +7,7 @@ unsafe extern "C" {
 }
 
 pub fn setlocale() {
+    // TODO: No unwrap
     unsafe {
         let locale_name = std::ffi::CString::new("").unwrap();
         libc::setlocale(libc::LC_ALL, locale_name.as_ptr());
