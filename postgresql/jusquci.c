@@ -1,6 +1,6 @@
 #include "postgres.h"
 
-#include "src/parser.h"
+#include "../src/parser.h"
 
 #include "fmgr.h"
 #include "tsearch/ts_public.h"

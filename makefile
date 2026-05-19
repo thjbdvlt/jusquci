@@ -1,17 +1,18 @@
-MODULE_big = jusquci
-EXTENSION = jusquci
-HEADERS = src/parser.h
-OBJS = jusquci.o src/parser.o src/affixes.o src/punct.o src/util.o ./src/html.o
-DATA = jusquci--1.0.sql
+SRC := $(wildcard src/*.c) $(wildcard src/*.h)
+CCFLAGS := -Wall -Wextra -Wconversion -Wno-unused-variable -Wno-unused-parameter
 
-PG_CFLAGS = -DJUSQUCI_POSTGRESQL
+all: jusquci.so
 
-PG_CONFIG ?= pg_config
-PGXS := $(shell $(PG_CONFIG) --pgxs)
-include $(PGXS)
+jusquci.so: $(SRC)
+	gcc -fPIC -shared -o $@ $(CCFLAGS) $^
 
-TSEARCH_DIR = $(shell $(PG_CONFIG) --sharedir)/tsearch_data
-DICT_DATA = french_jusquci.stop
+postgresql/jusquci.so cli/jusquci: $(SRC)
+	$(MAKE) -C $(@D)
 
-install_stop: install
-	cp french_jusquci.stop $(TSEARCH_DIR)/french_jusquci.stop
+clean:
+	rm -f jusquci.so
+	$(MAKE) clean -C postgresql
+	$(MAKE) clean -C cli
+	rm -rf python/build python/*.egg-info
+
+.PHONY: all clean

@@ -1,9 +1,9 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
-#include "../src/parser.h"
-#include "../src/typifier.h"
-#include "../src/html.h"
+#include "../../src/parser.h"
+#include "../../src/typifier.h"
+#include "../../src/html.h"
 
 static PyObject*
 tokenize(PyObject* self, PyObject* arg)
