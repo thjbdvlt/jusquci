@@ -92,5 +92,4 @@ mod tests {
         let subj = &tokens[1];
         assert_eq!(verb.ttype, subj.ttype);
     }
-
 }
