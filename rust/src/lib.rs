@@ -8,12 +8,12 @@ unsafe extern "C" {
     fn get_token(pst: *mut parser::TParser) -> i32;
 }
 
-pub fn setlocale() {
-    // TODO: No unwrap
+pub fn setlocale() -> Result<(), std::io::Error> {
     unsafe {
-        let locale_name = std::ffi::CString::new("").unwrap();
+        let locale_name = std::ffi::CString::new("")?;
         libc::setlocale(libc::LC_ALL, locale_name.as_ptr());
     }
+    Ok(())
 }
 
 /// a token
@@ -33,18 +33,26 @@ pub struct Token {
     pub blen: usize,
 }
 
+impl Token {
+    pub fn is_word(&self) -> bool {
+        matches!(
+            self.ttype,
+            parser::TS_WORD | parser::TS_ABBREV | parser::TS_COMPOUND
+        )
+    }
+}
+
 /// a parsed text
 pub type Document = Vec<Token>;
 
-pub fn tokenize(s: &str) -> Vec<Token> {
-    // TODO: no unwrap
+pub fn tokenize(s: &str) -> Result<Vec<Token>, widestring::error::Utf32Error> {
     let mut tokens = Vec::new();
     unsafe {
         // build the C string
         let ws = &mut widestring::U32String::from_str(&s);
         let wptr = ws.as_mut_ustr();
         let ptr = wptr.as_mut_ptr();
-        let ws_len = ws.len().try_into().unwrap();
+        let ws_len = ws.len() as i32;
         // make the parser from it
         let mut pst = new_parser();
         init_parser(&mut pst, ptr, ws_len);
@@ -58,8 +66,8 @@ pub fn tokenize(s: &str) -> Vec<Token> {
                 let cidx = pst.tidx as usize;
                 let clen = pst.tlen as usize;
                 let substr = &ws[cidx..cidx + clen];
-                let ttext = substr.to_string().unwrap();
-                let blen = ttext.bytes().count();
+                let ttext = substr.to_string()?;
+                let blen = ttext.len();
                 // skip spaces (but still increment byte index)
                 if ttype != parser::TS_SPACE {
                     tokens.push(Token {
@@ -75,7 +83,7 @@ pub fn tokenize(s: &str) -> Vec<Token> {
             }
         }
     }
-    tokens
+    Ok(tokens)
 }
 
 #[cfg(test)]
@@ -84,9 +92,9 @@ mod tests {
 
     #[test]
     fn test_tok() {
-        setlocale();
+        setlocale().unwrap();
         let text = "Oùùù puis-je m'installer?";
-        let tokens = tokenize(text);
+        let tokens = tokenize(text).unwrap();
         let t = &tokens[2];
         assert_eq!(&text[t.bidx..t.bidx + t.blen], "-je");
         let t = &tokens[0];
@@ -96,9 +104,9 @@ mod tests {
 
     #[test]
     fn test_ttype() {
-        setlocale();
+        setlocale().unwrap();
         let text = "puis-je?";
-        let tokens = tokenize(text);
+        let tokens = tokenize(text).unwrap();
         let verb = &tokens[0];
         let subj = &tokens[1];
         assert_eq!(verb.ttype, subj.ttype);
