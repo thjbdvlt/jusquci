@@ -1,2 +1,10 @@
-all:
-	cargo test -- --nocapture
+build:
+	cargo build --release
+
+clean:
+	cargo clean
+
+test:
+	cargo test
+
+.PHONY: build clean test

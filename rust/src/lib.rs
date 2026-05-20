@@ -1,4 +1,4 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 pub mod parser;
 
@@ -24,11 +24,11 @@ pub struct Token {
     /// the token text
     pub ttext: String,
     /// the token char index
-    pub cindex: usize,
+    pub cidx: usize,
     /// the number of chars in the token
     pub clen: usize,
     /// the token byte index
-    pub bindex: usize,
+    pub bidx: usize,
     /// the number of bytes in the token
     pub blen: usize,
 }
@@ -49,29 +49,29 @@ pub fn tokenize(s: &str) -> Vec<Token> {
         let mut pst = new_parser();
         init_parser(&mut pst, ptr, ws_len);
         // get tokens
-        let mut bindex = 0;
+        let mut bidx = 0;
         loop {
             let ttype = get_token(&mut pst);
             if ttype == parser::TS_END {
                 break;
             } else {
-                let cindex = pst.tidx as usize;
+                let cidx = pst.tidx as usize;
                 let clen = pst.tlen as usize;
-                let substr = &ws[cindex..cindex + clen];
+                let substr = &ws[cidx..cidx + clen];
                 let ttext = substr.to_string().unwrap();
                 let blen = ttext.bytes().count();
                 // skip spaces (but still increment byte index)
                 if ttype != parser::TS_SPACE {
                     tokens.push(Token {
-                        bindex,
+                        bidx,
                         blen,
                         ttype,
                         ttext,
-                        cindex,
+                        cidx,
                         clen,
                     });
                 }
-                bindex += blen;
+                bidx += blen;
             }
         }
     }
@@ -88,9 +88,9 @@ mod tests {
         let text = "Oùùù puis-je m'installer?";
         let tokens = tokenize(text);
         let t = &tokens[2];
-        assert_eq!(&text[t.bindex..t.bindex + t.blen], "-je");
+        assert_eq!(&text[t.bidx..t.bidx + t.blen], "-je");
         let t = &tokens[0];
-        assert_eq!(&text[t.bindex..t.bindex + t.blen], "Oùùù");
+        assert_eq!(&text[t.bidx..t.bidx + t.blen], "Oùùù");
         assert_eq!(&t.ttext, "Oùùù");
     }
 
