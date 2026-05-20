@@ -100,6 +100,8 @@ mod tests {
         let t = &tokens[0];
         assert_eq!(&text[t.bidx..t.bidx + t.blen], "Oùùù");
         assert_eq!(&t.ttext, "Oùùù");
+        let _ = text.to_owned().insert_str(t.bidx+t.blen, "__");
+        let _ = text.to_owned().insert_str(t.bidx, "__");
     }
 
     #[test]
