@@ -1,4 +1,4 @@
-__jusquci__ -- tokenizer for french.
+__jusquci__ -- tokenizer for french (C/Rust/Python/PostgreSQL/Bash).
 
 | text                    | tokens                      |
 | ----------------------- | --------------------------- |
@@ -21,15 +21,18 @@ __jusquci__ -- tokenizer for french.
 
 ## postgresql extension
 
-the primary role of this tokenizer is to be used as a [text search parser](https://www.postgresql.org/docs/current/textsearch-parsers.html) in postgresql, hence it's proposed here as an postgresql extension.
+this tokenizer can be used as a [text search parser](https://www.postgresql.org/docs/current/textsearch-parsers.html) in postgresql.
 
 ```bash
+# install the extension and the list of stop words
 make install install_stop
 ```
 
 ```sql
+-- create the extension
 create extension jusquci;
 
+-- make a basic test
 select to_tsvector(
     'jusquci',
     'le quotidien,s''invente-t-il par mille.manière de braconner???'
@@ -78,13 +81,36 @@ a normalizer can also be used as a spacy component. it replace the `norm_` attri
 - `emoticon`: `:)`
 - `emoji`: `:)`
 
+## rust
+
+Rust bindings expose two functions:
+
+- `setlocale`: a shortcut for `libc::setlocale`. must be called before tokenization.
+- `tokenize`: the main function
+
+```rust
+jusquci::setlocale()?; // this is important for unicode characters
+let text = "Le quotidien s'invente avec mille manière de braconner.";
+let tokens = jusquci::tokenize(text);
+for token in tokens {
+    if token.is_word() {
+        let Token{
+            text, // token text (i.e. form)
+            ttype, // token type ID (e.g. word, number)
+            bidx, // token byte offset
+            blen, // token byte length
+            cidx, // token character offset
+            clen // token character length
+        } = token;
+    }
+}
+```
+
 ## as a command line tool
 
 to use __jusquci__ as a simple command line tokenizer (that reads from `stdin`), just compile it with the makefile in the `cli` directory.
 the program read a text from standard input and output tokens separated by spaces.
 <!--it also add newlines after strong punctuation signs (`.`, `?`, `!`). -->
-
-## rust
 
 ## sources
 

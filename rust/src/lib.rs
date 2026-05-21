@@ -42,9 +42,6 @@ impl<'a> Token<'a> {
     }
 }
 
-/// a parsed text
-pub type Document<'a> = Vec<Token<'a>>;
-
 pub fn tokenize<'a>(s: &'a str) -> Vec<Token<'a>> {
     let mut tokens = Vec::new();
     unsafe {
