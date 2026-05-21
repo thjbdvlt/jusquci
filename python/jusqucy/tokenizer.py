@@ -4,7 +4,7 @@ from spacy.tokens import Doc, Token
 from spacy.vocab import Vocab
 from spacy import registry
 from .jusqucy import tokenize
-from .ttypes import get_ttype, token_isword
+from .ttypes import get_ttype, token_isword, token_byte_index
 from typing import Union
 
 
@@ -14,10 +14,12 @@ class JusqucyTokenizer:
         vocab: Vocab,
         ext_token_ttype: Union[str, None] = "isword",
         ext_token_isword: Union[str, None] = "ttype",
+        ext_token_byte_index: Union[str, None] = "byte_index",
     ):
         self.vocab = vocab
 
-        Doc.set_extension("jusqucy_ttypes", default=None, force=True)
+        for i in ["ttypes", "offsets", "lengths"]:
+            Doc.set_extension(f"jusqucy_{i}", default=None, force=True)
 
         if ext_token_ttype:
             Token.set_extension(
@@ -29,6 +31,13 @@ class JusqucyTokenizer:
                 ext_token_isword, getter=token_isword, force=True
             )
 
+        if ext_token_byte_index:
+            Token.set_extension(
+                ext_token_byte_index,
+                getter=token_byte_index,
+                force=True,
+            )
+
     def __call__(self, text: str, *args, **kwargs) -> Doc:
         """Tokenize a text.
 
@@ -38,7 +47,9 @@ class JusqucyTokenizer:
         Returns (Doc): the spacy.tokens.Doc.
         """
 
-        words, ttypes, spaces, sent_starts = tokenize(text)
+        words, ttypes, spaces, sent_starts, offsets, lengths = tokenize(
+            text
+        )
 
         doc = Doc(
             words=words,
@@ -48,6 +59,8 @@ class JusqucyTokenizer:
             **kwargs,
         )
         doc._.jusqucy_ttypes = ttypes
+        doc._.jusqucy_offsets = offsets
+        doc._.jusqucy_lengths = lengths
 
         return doc
 
@@ -66,10 +79,14 @@ class JusqucyTokenizer:
 def create_tokenizer(
     ext_token_ttype: Union[str, None] = "ttype",
     ext_token_isword: Union[str, None] = "isword",
+    ext_token_byte_index: Union[str, None] = "byte_index",
 ):
     def make_tokenizer(nlp):
         return JusqucyTokenizer(
-            nlp.vocab, ext_token_ttype, ext_token_isword
+            nlp.vocab,
+            ext_token_ttype,
+            ext_token_isword,
+            ext_token_byte_index,
         )
 
     return make_tokenizer

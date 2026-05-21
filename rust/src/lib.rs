@@ -18,11 +18,11 @@ pub fn setlocale() -> Result<(), std::io::Error> {
 
 /// a token
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Token {
+pub struct Token<'a> {
+    /// the text
+    pub text: &'a str,
     /// the token type
     pub ttype: i32,
-    /// the token text
-    pub ttext: String,
     /// the token char index
     pub cidx: usize,
     /// the number of chars in the token
@@ -33,7 +33,7 @@ pub struct Token {
     pub blen: usize,
 }
 
-impl Token {
+impl<'a> Token<'a> {
     pub fn is_word(&self) -> bool {
         matches!(
             self.ttype,
@@ -43,9 +43,9 @@ impl Token {
 }
 
 /// a parsed text
-pub type Document = Vec<Token>;
+pub type Document<'a> = Vec<Token<'a>>;
 
-pub fn tokenize(s: &str) -> Result<Vec<Token>, widestring::error::Utf32Error> {
+pub fn tokenize<'a>(s: &'a str) -> Vec<Token<'a>> {
     let mut tokens = Vec::new();
     unsafe {
         // build the C string
@@ -57,33 +57,30 @@ pub fn tokenize(s: &str) -> Result<Vec<Token>, widestring::error::Utf32Error> {
         let mut pst = new_parser();
         init_parser(&mut pst, ptr, ws_len);
         // get tokens
-        let mut bidx = 0;
         loop {
             let ttype = get_token(&mut pst);
             if ttype == parser::TS_END {
                 break;
             } else {
-                let cidx = pst.tidx as usize;
-                let clen = pst.tlen as usize;
-                let substr = &ws[cidx..cidx + clen];
-                let ttext = substr.to_string()?;
-                let blen = ttext.len();
-                // skip spaces (but still increment byte index)
                 if ttype != parser::TS_SPACE {
+                    let cidx = pst.tidx as usize;
+                    let clen = pst.tlen as usize;
+                    let bidx = pst.bidx as usize;
+                    let blen = pst.blen as usize;
+                    let text = &s[bidx..bidx + blen];
                     tokens.push(Token {
                         bidx,
                         blen,
                         ttype,
-                        ttext,
+                        text,
                         cidx,
                         clen,
                     });
                 }
-                bidx += blen;
             }
         }
     }
-    Ok(tokens)
+    tokens
 }
 
 #[cfg(test)]
@@ -94,13 +91,13 @@ mod tests {
     fn test_tok() {
         setlocale().unwrap();
         let text = "Oùùù puis-je m'installer?";
-        let tokens = tokenize(text).unwrap();
+        let tokens = tokenize(text);
         let t = &tokens[2];
         assert_eq!(&text[t.bidx..t.bidx + t.blen], "-je");
         let t = &tokens[0];
         assert_eq!(&text[t.bidx..t.bidx + t.blen], "Oùùù");
-        assert_eq!(&t.ttext, "Oùùù");
-        let _ = text.to_owned().insert_str(t.bidx+t.blen, "__");
+        assert_eq!(t.text, "Oùùù");
+        let _ = text.to_owned().insert_str(t.bidx + t.blen, "__");
         let _ = text.to_owned().insert_str(t.bidx, "__");
     }
 
@@ -108,7 +105,7 @@ mod tests {
     fn test_ttype() {
         setlocale().unwrap();
         let text = "puis-je?";
-        let tokens = tokenize(text).unwrap();
+        let tokens = tokenize(text);
         let verb = &tokens[0];
         let subj = &tokens[1];
         assert_eq!(verb.ttype, subj.ttype);

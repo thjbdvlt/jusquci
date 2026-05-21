@@ -1,15 +1,15 @@
 CC = gcc
 CC_FLAGS = -shared -fPIC \
-		   -I/usr/include/python3.11 \
+		   -I/usr/include/python3.13 \
 		   -Wall -Wextra -Wconversion -Wno-unused-variable \
 		   -Wno-unused-parameter -O2 -g
 
-SOURCES = ../src/*.c jusqucy.c
+SOURCES = $(wildcard ../../src/*.c) jusqucy.c
 OBJECTS = jusqucy.so
 
 all: jusqucy.so
 
-jusqucy.so: ../src/parser.c ../src/typifier.c jusqucy.c 
+jusqucy.so: ../../src/parser.c ../../src/typifier.c jusqucy.c
 	$(CC) $(CC_FLAGS) $(SOURCES) -o $@
 
 test: jusqucy.so

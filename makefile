@@ -1,5 +1,7 @@
-SRC := $(wildcard src/*.c) $(wildcard src/*.h)
+SRC := $(wildcard src/*.c)
+HEADERS := $(wildcard src/*.h)
 CCFLAGS := -Wall -Wextra -Wconversion -Wno-unused-variable -Wno-unused-parameter
+OBJS := $(SRC:.c=.o)
 
 bindings := postgresql/jusquci.so \
 						cli/jusquci \
@@ -7,8 +9,11 @@ bindings := postgresql/jusquci.so \
 
 all: jusquci.so
 
-jusquci.so: $(SRC)
+jusquci.so: $(SRC) $(HEADERS)
 	gcc -fPIC -shared -o $@ $(CCFLAGS) $^
+
+# %.o: %.c %.h
+# 	gcc -o $@ $(CCFLAGS) $<
 
 bindings: $(bindings)
 

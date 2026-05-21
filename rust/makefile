@@ -1,10 +1,15 @@
-build:
+so := ../jusquci.so
+
+build: $(so)
 	cargo build --release
 
 clean:
 	cargo clean
 
-test:
+test: $(so)
 	cargo test
 
-.PHONY: build clean test
+$(so):
+	$(MAKE) -C ..
+
+.PHONY: build clean test $(so)

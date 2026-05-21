@@ -1,9 +1,9 @@
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
 
+#include "../../src/html.h"
 #include "../../src/parser.h"
 #include "../../src/typifier.h"
-#include "../../src/html.h"
 
 static PyObject*
 tokenize(PyObject* self, PyObject* arg)
@@ -12,8 +12,10 @@ tokenize(PyObject* self, PyObject* arg)
   Py_ssize_t len, _len;  /* len of input string */
   int i, y, ttype;       /* for iterations */
   PyObject *input, *ret; /* input value and output values */
-  PyObject *list_words, *list_types, *list_spaces,
-    *list_sents; /* lists */
+  PyObject *list_words, *list_types, *list_spaces, *list_sents,
+    *list_byte_offsets, *list_byte_lengths; /* lists */
+
+  // TODO: byte_offset and byte_length could be an option
 
   /* get the parameter value */
   if (!PyArg_Parse(arg, "U:tokenize", &input)) {
@@ -46,8 +48,12 @@ tokenize(PyObject* self, PyObject* arg)
   int* lens = (int*)malloc(sizeof(int*) * (size_t)len);
   int* _types = (int*)malloc(sizeof(int*) * (size_t)len + 1);
 
+  /* bytes offsets and lengths */
+  int* byte_offsets = (int*)malloc(sizeof(int*) * (size_t)len);
+  int* byte_lengths = (int*)malloc(sizeof(int*) * (size_t)len);
+
   /* ensure that memory has been allocated */
-  if (!spaces || !idx || !lens || !_types) {
+  if (!spaces || !idx || !lens || !_types || !byte_offsets || !byte_lengths) {
     PyMem_FREE(str);
     return PyErr_NoMemory();
   }
@@ -73,6 +79,9 @@ tokenize(PyObject* self, PyObject* arg)
   idx[0] = pst.tidx;
   lens[0] = pst.tlen;
 
+  byte_offsets[0] = pst.bidx;
+  byte_lengths[0] = pst.blen;
+
   /* types is used for two things: `ttypes` and `is_sent_start`. */
   _types[0] = TS_NEWLINE;
   int* types = &_types[1];
@@ -93,6 +102,8 @@ tokenize(PyObject* self, PyObject* arg)
       spaces[i] = 0;
       idx[i] = pst.tidx;
       lens[i] = pst.tlen;
+      byte_offsets[i] = pst.bidx;
+      byte_lengths[i] = pst.blen;
       types[i] = ttype;
       i++;
     }
@@ -105,6 +116,8 @@ MakeLists:
   list_types = PyList_New(i);
   list_spaces = PyList_New(i);
   list_sents = PyList_New(i);
+  list_byte_offsets = PyList_New(i);
+  list_byte_lengths = PyList_New(i);
 
   int* sents = (int*)malloc(sizeof(int*) * (size_t)i + 1);
   sents[i + 1] = 0;
@@ -121,14 +134,18 @@ MakeLists:
   /* populate the lists */
   int isword = 0;
   for (y = 0; y < i; y++) {
-    PyObject* word = PyUnicode_FromKindAndData(
-      PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]);
+    PyObject* word =
+      PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, &str[idx[y]], lens[y]);
     PyObject* space = PyLong_FromLong(spaces[y]);
     PyObject* ttype = PyLong_FromLong(types[y]);
+    PyObject* byte_offset = PyLong_FromLong(byte_offsets[y]);
+    PyObject* byte_length = PyLong_FromLong(byte_lengths[y]);
 
     PyList_SET_ITEM(list_words, y, word);
     PyList_SET_ITEM(list_spaces, y, space);
     PyList_SET_ITEM(list_types, y, ttype);
+    PyList_SET_ITEM(list_byte_offsets, y, byte_offset);
+    PyList_SET_ITEM(list_byte_lengths, y, byte_length);
 
     Py_DECREF(space);
     Py_DECREF(ttype);
@@ -161,14 +178,21 @@ MakeLists:
   Py_DECREF(isnt_sent_start);
 
   /* build the final tuple */
-  ret = PyTuple_Pack(
-    4, list_words, list_types, list_spaces, list_sents);
+  ret = PyTuple_Pack(6,
+    list_words,
+    list_types,
+    list_spaces,
+    list_sents,
+    list_byte_offsets,
+    list_byte_lengths);
 
   /* decrement reference count of each list. */
   Py_DECREF(list_types);
   Py_DECREF(list_words);
   Py_DECREF(list_spaces);
   Py_DECREF(list_sents);
+  Py_DECREF(list_byte_offsets);
+  Py_DECREF(list_byte_lengths);
 
 FreeEnd:
 
@@ -178,6 +202,8 @@ FreeEnd:
   free(spaces);
   free(idx);
   free(lens);
+  free(byte_offsets);
+  free(byte_lengths);
   free(_types);
   free(sents);
 
@@ -236,8 +262,7 @@ get_ttype_norm(PyObject* self, PyObject* arg)
   else
 
     /* return the replacement string */
-    res =
-      PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, norm, len);
+    res = PyUnicode_FromKindAndData(PyUnicode_4BYTE_KIND, norm, len);
 
   return res;
 }
@@ -279,7 +304,6 @@ ttypify_token(PyObject* self, PyObject* arg)
 
   /* return python int (token type ID) */
   return ret;
-
 }
 
 /* informations about the module, so it can be called from within

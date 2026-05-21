@@ -5,10 +5,12 @@
 #include "parser.h"
 #include "punct.h"
 #include "util.h"
+#include <locale.h>
 #include <stdlib.h>
 #include <wchar.h>
 #include <wctype.h>
-#include <locale.h>
+
+#include "stdio.h"
 
 /* these functions modify TParser values (especially `pos`) and
  * returns the token type (word, url, digit, ordinal, ...).
@@ -22,8 +24,13 @@ parse_citekey(TParser* pst);
 int
 parse_digit(TParser* pst);
 
+/* update the byte index and length before returning the token */
+void
+update_byte_index(TParser* pst);
+
 TParser
-new_parser() {
+new_parser()
+{
   setlocale(LC_CTYPE, "");
   TParser pst;
   return pst;
@@ -48,6 +55,11 @@ init_parser(TParser* pst, jchar* str, int len)
   /* special cases when next token's type is already known. */
   pst->_next = TS_START;
   pst->_prev = TS_START;
+
+  /* initiate byte indexes and length */
+  pst->bidx = 0;
+  pst->blen = 0;
+  pst->_mb = 0;
 }
 
 int
@@ -109,11 +121,10 @@ parse_word(TParser* pst)
         }
         break;
 
-      /* very minimal support for "·ère·s": it's not check, just assumed that 
+      /* very minimal support for "·ère·s": it's not check, just assumed that
        * it is inclusive language if followed by a letter. */
       case L'·':
-        if (pst->strlen - pst->pos &&
-            iswalpha(pst->str[pst->pos + 1])) {
+        if (pst->strlen - pst->pos && iswalpha(pst->str[pst->pos + 1])) {
           pst->pos++;
         } else {
           return TS_WORD;
@@ -176,8 +187,7 @@ parse_url(TParser* pst, jchar c)
     do {
       pst->pos++;
       c = pst->str[pst->pos];
-    } while (
-      pst->pos < pst->strlen && (!iswspace(c) && !iswcntrl(c)));
+    } while (pst->pos < pst->strlen && (!iswspace(c) && !iswcntrl(c)));
     return 1;
   }
 
@@ -242,7 +252,7 @@ EndDigit:
     return TS_NUMBER;
 
   lenord = cmpiany(
-    &pst->str[pst->pos], suff_ord, (size_t)(pst->strlen-i), N_SUFF_ORD);
+    &pst->str[pst->pos], suff_ord, (size_t)(pst->strlen - i), N_SUFF_ORD);
   if (lenord) {
     pst->pos += (int)lenord;
     if (pst->str[pst->pos] == L's')
@@ -480,8 +490,7 @@ get_token(TParser* pst)
     case Ch_Space:
     case Ch_PunctEndSent:
       ttype = chtype;
-      while (pst->pos < pst->strlen &&
-             getchtype(pst->str[pst->pos]) == chtype)
+      while (pst->pos < pst->strlen && getchtype(pst->str[pst->pos]) == chtype)
         pst->pos++;
       break;
 
@@ -509,5 +518,28 @@ EndToken:
   pst->ttype = ttype;
   pst->_prev = ttype;
 
+  // TODO: only optionally maintain bytes indexes
+  // TODO: optimize this if possible
+  update_byte_index(pst);
+
   return ttype;
+}
+
+void
+update_byte_index(TParser* pst)
+{
+  char buf[32];
+
+  pst->bidx += pst->blen;
+  pst->blen = 0;
+
+  jchar* ptr = &pst->str[pst->tidx];
+
+  for (int i = 0; i < pst->tlen; i++) {
+    wchar_t wc = ptr[i];
+    // if wchar_t is ascii, then mb = 1, else compute it.
+    // source of iswascii: https://github.com/lattera/freebsd (iswctype.c)
+    // (wctomb is very slow, that's why i want to avoid it when possible.)
+    pst->blen += ((wc & ~0x7F) == 0) ? 1 : wctomb(buf, wc);
+  }
 }

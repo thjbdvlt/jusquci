@@ -17,6 +17,10 @@ typedef struct
   int tidx;  // index (first character)
   int ttype; // token type (word, space, ...)
 
+  // bytes index and length
+  int blen;  // byte length
+  int bidx;  // byte index
+
   // for char*.
   // (not used by 'get_token', only for the Postgres extension)
   char* _str;
