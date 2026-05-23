@@ -160,7 +160,6 @@ MakeLists:
       case TS_EMOTICON:
       case TS_EMOJI:
       case TS_URL:
-      case TS_NEWLINE:
       case TS_PUNCTSTRONG:
         sents[y] = 1;
         break;
