@@ -46,6 +46,7 @@ init_parser(TParser* pst, jchar* str, int len)
 
   /* start at the beginning of the string. */
   pst->pos = 0;
+  pst->line_number = 0;
 
   /* special cases when next token's type is already known. */
   pst->next = TS_START;
@@ -54,13 +55,15 @@ init_parser(TParser* pst, jchar* str, int len)
   /* initiate byte indexes and length */
   pst->_mb = 0;
 
-  Token token;
-  token.index = 0;
-  token.length = 0;
-  token.byte_index = 0;
-  token.byte_length = 0;
-  token.line_number = 0;
-  token.kind = TS_START;
+  /* initiate an empty first token */
+  Token token = {
+    .index = 0,
+    .length = 0,
+    .byte_index = 0,
+    .byte_length = 0,
+    .line_number = 0,
+    .kind = TS_START,
+  };
   pst->token = token;
 }
 
@@ -310,6 +313,7 @@ get_token(TParser* pst)
       kind = TS_NEWLINE;
       chtype = Ch_Space;
       pst->pos++;
+      pst->line_number++;
       goto EndToken;
       break;
 
@@ -518,6 +522,7 @@ EndToken:
   /* update the token informations */
   pst->token.length = pst->pos - pst->token.index;
   pst->token.kind = kind;
+  pst->token.line_number = pst->line_number;
   pst->prev = kind;
 
   // TODO: only optionally maintain bytes indexes

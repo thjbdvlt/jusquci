@@ -13,7 +13,7 @@ tokenize(PyObject* self, PyObject* arg)
   int i, y, ttype;       /* for iterations */
   PyObject *input, *ret; /* input value and output values */
   PyObject *list_words, *list_types, *list_spaces, *list_sents,
-    *list_byte_offsets, *list_byte_lengths; /* lists */
+    *list_byte_offsets, *list_byte_lengths, *list_line_numbers; /* lists */
 
   // TODO: byte_offset and byte_length could be an option
 
@@ -51,9 +51,10 @@ tokenize(PyObject* self, PyObject* arg)
   /* bytes offsets and lengths */
   int* byte_offsets = (int*)malloc(sizeof(int*) * (size_t)len);
   int* byte_lengths = (int*)malloc(sizeof(int*) * (size_t)len);
+  int* line_numbers = (int*)malloc(sizeof(int*) * (size_t)len);
 
   /* ensure that memory has been allocated */
-  if (!spaces || !idx || !lens || !_types || !byte_offsets || !byte_lengths) {
+  if (!spaces || !idx || !lens || !_types || !byte_offsets || !byte_lengths || !line_numbers) {
     PyMem_FREE(str);
     return PyErr_NoMemory();
   }
@@ -81,6 +82,7 @@ tokenize(PyObject* self, PyObject* arg)
 
   byte_offsets[0] = pst.token.byte_index;
   byte_lengths[0] = pst.token.byte_length;
+  line_numbers[0] = pst.token.line_number;
 
   /* types is used for two things: `ttypes` and `is_sent_start`. */
   _types[0] = TS_NEWLINE;
@@ -104,6 +106,7 @@ tokenize(PyObject* self, PyObject* arg)
       lens[i] = pst.token.length;
       byte_offsets[i] = pst.token.byte_index;
       byte_lengths[i] = pst.token.byte_length;
+      line_numbers[i] = pst.token.line_number;
       types[i] = ttype;
       i++;
     }
@@ -118,6 +121,7 @@ MakeLists:
   list_sents = PyList_New(i);
   list_byte_offsets = PyList_New(i);
   list_byte_lengths = PyList_New(i);
+  list_line_numbers = PyList_New(i);
 
   int* sents = (int*)malloc(sizeof(int*) * (size_t)i + 1);
   sents[i + 1] = 0;
@@ -140,12 +144,14 @@ MakeLists:
     PyObject* ttype = PyLong_FromLong(types[y]);
     PyObject* byte_offset = PyLong_FromLong(byte_offsets[y]);
     PyObject* byte_length = PyLong_FromLong(byte_lengths[y]);
+    PyObject* line_number = PyLong_FromLong(line_numbers[y]);
 
     PyList_SET_ITEM(list_words, y, word);
     PyList_SET_ITEM(list_spaces, y, space);
     PyList_SET_ITEM(list_types, y, ttype);
     PyList_SET_ITEM(list_byte_offsets, y, byte_offset);
     PyList_SET_ITEM(list_byte_lengths, y, byte_length);
+    PyList_SET_ITEM(list_line_numbers, y, line_number);
 
     Py_DECREF(space);
     Py_DECREF(ttype);
@@ -178,13 +184,14 @@ MakeLists:
   Py_DECREF(isnt_sent_start);
 
   /* build the final tuple */
-  ret = PyTuple_Pack(6,
+  ret = PyTuple_Pack(7,
     list_words,
     list_types,
     list_spaces,
     list_sents,
     list_byte_offsets,
-    list_byte_lengths);
+    list_byte_lengths,
+    list_line_numbers);
 
   /* decrement reference count of each list. */
   Py_DECREF(list_types);
@@ -193,6 +200,7 @@ MakeLists:
   Py_DECREF(list_sents);
   Py_DECREF(list_byte_offsets);
   Py_DECREF(list_byte_lengths);
+  Py_DECREF(list_line_numbers);
 
 FreeEnd:
 
@@ -204,6 +212,7 @@ FreeEnd:
   free(lens);
   free(byte_offsets);
   free(byte_lengths);
+  free(line_numbers);
   free(_types);
   free(sents);
 

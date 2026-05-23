@@ -25,6 +25,7 @@ pub struct Token<'a> {
     pub char_length: usize,
     pub byte_index: usize,
     pub byte_length: usize,
+    pub line_number: usize,
 }
 
 impl<'a> Token<'a> {
@@ -63,6 +64,7 @@ pub fn tokenize<'a>(s: &'a str) -> Vec<Token<'a>> {
                         byte_length: blen,
                         char_index: pst.token.index as usize,
                         char_length: pst.token.length as usize,
+                        line_number: pst.token.line_number as usize,
                     });
                 }
             }
@@ -85,7 +87,9 @@ mod tests {
         let t = &tokens[0];
         assert_eq!(&text[t.byte_index..t.byte_index + t.byte_length], "Oùùù");
         assert_eq!(t.text, "Oùùù");
-        let _ = text.to_owned().insert_str(t.byte_index + t.byte_length, "__");
+        let _ = text
+            .to_owned()
+            .insert_str(t.byte_index + t.byte_length, "__");
         let _ = text.to_owned().insert_str(t.byte_index, "__");
     }
 

@@ -30,9 +30,3 @@ def get_ttype(token):
 
 def token_isword(token):
     return token.doc._.jusqucy_ttypes[token.i] in (2, 3, 11)
-
-
-def token_byte_index(token):
-    offset = token.doc._.jusqucy_offsets[token.i]
-    length = token.doc._.jusqucy_lengths[token.i]
-    return (offset, offset + length)
