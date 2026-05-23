@@ -239,7 +239,7 @@ is_inversion(TParser* pst)
 
     if (x) {
       /* exclude "Vaison-la-Romaine". */
-      if (remain+1 > x-p && x[0] == L'-')
+      if (remain + 1 > x - p && x[0] == L'-')
         return 0;
       else
         return 1;
@@ -253,9 +253,9 @@ is_inversion(TParser* pst)
 int
 is_abbrev(TParser* pst)
 {
-  size_t len = (size_t)(pst->pos - pst->tidx);
+  size_t len = (size_t)(pst->pos - pst->token.index);
   jchar c = pst->str[pst->pos - 1];
-  jchar* p = &pst->str[pst->tidx];
+  jchar* p = &pst->str[pst->token.index];
 
   if (len == 1) {
     switch (c) {

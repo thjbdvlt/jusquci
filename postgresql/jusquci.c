@@ -88,13 +88,13 @@ jusquci_parser_gettoken(PG_FUNCTION_ARGS)
   // get the pointer where to write the token length
   tlen = (int*)PG_GETARG_POINTER(2);
 
-  idx = pst->tidx + pst->_mb;
-  len = pst->tlen;
+  idx = pst->token.index + pst->_mb;
+  len = pst->token.length;
 
   p = &pst->_str[idx];
   startpos = p;
 
-  for (int i=0; i<pst->tlen; i++) {
+  for (int i=0; i<pst->token.length; i++) {
     int mb = pg_mblen(p+i) - 1;
     if (mb > 0) {
       p+=mb;

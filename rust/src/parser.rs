@@ -22,40 +22,56 @@ pub const TS_LASTNUM: i32 = 15;
 pub type jchar = ::std::os::raw::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct Token {
+    pub index: ::std::os::raw::c_int,
+    pub length: ::std::os::raw::c_int,
+    pub byte_index: ::std::os::raw::c_int,
+    pub byte_length: ::std::os::raw::c_int,
+    pub line_number: ::std::os::raw::c_int,
+    pub kind: ::std::os::raw::c_int,
+}
+#[allow(clippy::unnecessary_operation, clippy::identity_op)]
+const _: () = {
+    ["Size of Token"][::std::mem::size_of::<Token>() - 24usize];
+    ["Alignment of Token"][::std::mem::align_of::<Token>() - 4usize];
+    ["Offset of field: Token::index"][::std::mem::offset_of!(Token, index) - 0usize];
+    ["Offset of field: Token::length"][::std::mem::offset_of!(Token, length) - 4usize];
+    ["Offset of field: Token::byte_index"][::std::mem::offset_of!(Token, byte_index) - 8usize];
+    ["Offset of field: Token::byte_length"][::std::mem::offset_of!(Token, byte_length) - 12usize];
+    ["Offset of field: Token::line_number"][::std::mem::offset_of!(Token, line_number) - 16usize];
+    ["Offset of field: Token::kind"][::std::mem::offset_of!(Token, kind) - 20usize];
+};
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct TParser {
     str_: *mut jchar,
     strlen: ::std::os::raw::c_int,
     pos: ::std::os::raw::c_int,
-    pub tlen: ::std::os::raw::c_int,  // token length (characters)
-    pub tidx: ::std::os::raw::c_int,  // token start index (characters)
-    pub ttype: ::std::os::raw::c_int, // token type id
-    pub blen: ::std::os::raw::c_int,  // token byte length
-    pub bidx: ::std::os::raw::c_int,  // token byte start index
+    line_number: ::std::os::raw::c_int,
     _str: *mut ::std::os::raw::c_char,
     _mb: ::std::os::raw::c_int,
     _pos: ::std::os::raw::c_int,
     _len: ::std::os::raw::c_int,
-    _next: ::std::os::raw::c_int,
-    _prev: ::std::os::raw::c_int,
+    next: ::std::os::raw::c_int,
+    prev: ::std::os::raw::c_int,
+    pub token: Token,
 }
 #[allow(clippy::unnecessary_operation, clippy::identity_op)]
 const _: () = {
-    ["Size of TParser"][::std::mem::size_of::<TParser>() - 72usize];
+    ["Size of TParser"][::std::mem::size_of::<TParser>() - 80usize];
     ["Alignment of TParser"][::std::mem::align_of::<TParser>() - 8usize];
     ["Offset of field: TParser::str_"][::std::mem::offset_of!(TParser, str_) - 0usize];
     ["Offset of field: TParser::strlen"][::std::mem::offset_of!(TParser, strlen) - 8usize];
     ["Offset of field: TParser::pos"][::std::mem::offset_of!(TParser, pos) - 12usize];
-    ["Offset of field: TParser::tlen"][::std::mem::offset_of!(TParser, tlen) - 16usize];
-    ["Offset of field: TParser::tidx"][::std::mem::offset_of!(TParser, tidx) - 20usize];
-    ["Offset of field: TParser::ttype"][::std::mem::offset_of!(TParser, ttype) - 24usize];
-    ["Offset of field: TParser::blen"][::std::mem::offset_of!(TParser, blen) - 28usize];
-    ["Offset of field: TParser::bidx"][::std::mem::offset_of!(TParser, bidx) - 32usize];
-    ["Offset of field: TParser::_str"][::std::mem::offset_of!(TParser, _str) - 40usize];
-    ["Offset of field: TParser::_mb"][::std::mem::offset_of!(TParser, _mb) - 48usize];
-    ["Offset of field: TParser::_pos"][::std::mem::offset_of!(TParser, _pos) - 52usize];
-    ["Offset of field: TParser::_len"][::std::mem::offset_of!(TParser, _len) - 56usize];
-    ["Offset of field: TParser::_next"][::std::mem::offset_of!(TParser, _next) - 60usize];
-    ["Offset of field: TParser::_prev"][::std::mem::offset_of!(TParser, _prev) - 64usize];
+    ["Offset of field: TParser::line_number"]
+        [::std::mem::offset_of!(TParser, line_number) - 16usize];
+    ["Offset of field: TParser::_str"][::std::mem::offset_of!(TParser, _str) - 24usize];
+    ["Offset of field: TParser::_mb"][::std::mem::offset_of!(TParser, _mb) - 32usize];
+    ["Offset of field: TParser::_pos"][::std::mem::offset_of!(TParser, _pos) - 36usize];
+    ["Offset of field: TParser::_len"][::std::mem::offset_of!(TParser, _len) - 40usize];
+    ["Offset of field: TParser::next"][::std::mem::offset_of!(TParser, next) - 44usize];
+    ["Offset of field: TParser::prev"][::std::mem::offset_of!(TParser, prev) - 48usize];
+    ["Offset of field: TParser::token"][::std::mem::offset_of!(TParser, token) - 52usize];
 };
 unsafe extern "C" {
     pub fn get_token(pst: *mut TParser) -> ::std::os::raw::c_int;

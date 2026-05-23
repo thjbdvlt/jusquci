@@ -76,11 +76,11 @@ tokenize(PyObject* self, PyObject* arg)
    * (before 0)
    */
   spaces[0] = 0;
-  idx[0] = pst.tidx;
-  lens[0] = pst.tlen;
+  idx[0] = pst.token.index;
+  lens[0] = pst.token.length;
 
-  byte_offsets[0] = pst.bidx;
-  byte_lengths[0] = pst.blen;
+  byte_offsets[0] = pst.token.byte_index;
+  byte_lengths[0] = pst.token.byte_length;
 
   /* types is used for two things: `ttypes` and `is_sent_start`. */
   _types[0] = TS_NEWLINE;
@@ -100,10 +100,10 @@ tokenize(PyObject* self, PyObject* arg)
       spaces[i - 1] = 1;
     } else {
       spaces[i] = 0;
-      idx[i] = pst.tidx;
-      lens[i] = pst.tlen;
-      byte_offsets[i] = pst.bidx;
-      byte_lengths[i] = pst.blen;
+      idx[i] = pst.token.index;
+      lens[i] = pst.token.length;
+      byte_offsets[i] = pst.token.byte_index;
+      byte_lengths[i] = pst.token.byte_length;
       types[i] = ttype;
       i++;
     }

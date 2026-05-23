@@ -47,19 +47,21 @@ init_parser(TParser* pst, jchar* str, int len)
   /* start at the beginning of the string. */
   pst->pos = 0;
 
-  /* token informations */
-  pst->tidx = 0;
-  pst->tlen = 0;
-  pst->ttype = TS_START;
-
   /* special cases when next token's type is already known. */
-  pst->_next = TS_START;
-  pst->_prev = TS_START;
+  pst->next = TS_START;
+  pst->prev = TS_START;
 
   /* initiate byte indexes and length */
-  pst->bidx = 0;
-  pst->blen = 0;
   pst->_mb = 0;
+
+  Token token;
+  token.index = 0;
+  token.length = 0;
+  token.byte_index = 0;
+  token.byte_length = 0;
+  token.line_number = 0;
+  token.kind = TS_START;
+  pst->token = token;
 }
 
 int
@@ -98,7 +100,7 @@ parse_word(TParser* pst)
         }
         /* penses-tu */
         else if (is_inversion(pst)) {
-          pst->_next = TS_WORD;
+          pst->next = TS_WORD;
           return TS_WORD;
         }
         break;
@@ -268,25 +270,25 @@ get_token(TParser* pst)
 {
   jchar c;
   int chtype; /* character type */
-  int ttype;  /* token type */
-  int tlen;
+  int kind;  /* token type */
+  int length;
 
   /* reach the end */
   if (pst->pos >= pst->strlen) {
     pst->pos = pst->strlen;
-    pst->tidx = pst->strlen;
-    pst->tlen = 0;
+    pst->token.index = pst->strlen;
+    pst->token.length = 0;
     return TS_END;
   }
 
-  c = pst->str[pst->pos]; /* current character */
-  pst->tidx = pst->pos;   /* the token start index */
+  c = pst->str[pst->pos];      /* current character */
+  pst->token.index = pst->pos; /* the token start index */
 
   switch (c) {
 
     /* end of string. it should not get to this point. */
     case L'\0':
-      ttype = TS_END;
+      kind = TS_END;
       chtype = Ch_Ctrl;
       goto EndToken;
       break;
@@ -294,10 +296,10 @@ get_token(TParser* pst)
     /* simple white space */
     case L' ':
       chtype = Ch_Space;
-      if (pst->_prev == TS_SPACE) {
-        ttype = TS_SPACESIGN;
+      if (pst->prev == TS_SPACE) {
+        kind = TS_SPACESIGN;
       } else {
-        ttype = TS_SPACE;
+        kind = TS_SPACE;
         pst->pos++;
         goto EndToken;
       }
@@ -305,7 +307,7 @@ get_token(TParser* pst)
 
     /* newline */
     case L'\n':
-      ttype = TS_NEWLINE;
+      kind = TS_NEWLINE;
       chtype = Ch_Space;
       pst->pos++;
       goto EndToken;
@@ -313,7 +315,7 @@ get_token(TParser* pst)
 
     /* periodcentered is a punct sign unless it's inside a word */
     case L'·':
-      ttype = TS_PUNCT;
+      kind = TS_PUNCT;
       chtype = Ch_Punct;
       pst->pos++;
       goto EndToken;
@@ -322,29 +324,29 @@ get_token(TParser* pst)
     case L':':
       chtype = Ch_PunctEndSent;
       /* :happy: */
-      if ((tlen = is_emoji(pst))) {
-        ttype = TS_EMOJI;
-        pst->pos += tlen;
+      if ((length = is_emoji(pst))) {
+        kind = TS_EMOJI;
+        pst->pos += length;
         /* :-) */
-      } else if ((tlen = is_side_emoticon(pst, 1))) {
-        ttype = TS_EMOTICON;
-        pst->pos += tlen;
+      } else if ((length = is_side_emoticon(pst, 1))) {
+        kind = TS_EMOTICON;
+        pst->pos += length;
         /* default usage */
       } else {
-        ttype = TS_PUNCTSTRONG;
+        kind = TS_PUNCTSTRONG;
         pst->pos++;
       }
       goto EndToken;
       break;
 
     case L'&':
-      if ((tlen = is_html_entity(pst))) {
+      if ((length = is_html_entity(pst))) {
         chtype = Ch_Punct;
-        ttype = TS_PUNCT;
-        pst->pos += tlen;
+        kind = TS_PUNCT;
+        pst->pos += length;
       } else {
         chtype = Ch_Word;
-        ttype = TS_WORD;
+        kind = TS_WORD;
         pst->pos++;
       }
       goto EndToken;
@@ -353,12 +355,12 @@ get_token(TParser* pst)
     case L';':
       /* :-) */
       chtype = Ch_PunctEndSent;
-      if ((tlen = is_side_emoticon(pst, 1))) {
-        ttype = TS_EMOTICON;
-        pst->pos += tlen;
+      if ((length = is_side_emoticon(pst, 1))) {
+        kind = TS_EMOTICON;
+        pst->pos += length;
         /* default usage */
       } else {
-        ttype = TS_PUNCTSTRONG;
+        kind = TS_PUNCTSTRONG;
         pst->pos++;
       }
       goto EndToken;
@@ -366,14 +368,14 @@ get_token(TParser* pst)
 
     case L'=':
       chtype = Ch_Punct;
-      ttype = TS_PUNCT;
+      kind = TS_PUNCT;
       /* =) */
-      if ((tlen = is_side_emoticon(pst, 1))) {
-        ttype = TS_EMOTICON;
-        pst->pos += tlen;
+      if ((length = is_side_emoticon(pst, 1))) {
+        kind = TS_EMOTICON;
+        pst->pos += length;
         /* ===> */
-      } else if ((tlen = is_arrow(pst))) {
-        pst->pos += tlen;
+      } else if ((length = is_arrow(pst))) {
+        pst->pos += length;
         goto EndToken;
         /* ici = là */
       } else {
@@ -385,12 +387,12 @@ get_token(TParser* pst)
     case L'^':
       chtype = Ch_Punct;
       /* ^^ */
-      if ((tlen = is_emoticon_super(pst))) {
-        ttype = TS_EMOTICON;
-        pst->pos += tlen;
+      if ((length = is_emoticon_super(pst))) {
+        kind = TS_EMOTICON;
+        pst->pos += length;
         /* as an simili-punctuation sign */
       } else {
-        ttype = TS_PUNCT;
+        kind = TS_PUNCT;
         pst->pos++;
       }
       goto EndToken;
@@ -399,15 +401,15 @@ get_token(TParser* pst)
     case L'x':
     case L'X':
       /* XD, x.x */
-      if ((tlen = is_face_emoticon(pst)) ||
-          ((tlen = is_side_emoticon(pst, 1)))) {
-        ttype = TS_EMOTICON;
+      if ((length = is_face_emoticon(pst)) ||
+          ((length = is_side_emoticon(pst, 1)))) {
+        kind = TS_EMOTICON;
         chtype = Ch_Punct;
-        pst->pos += tlen;
+        pst->pos += length;
         goto EndToken;
       } else {
         chtype = Ch_Word;
-        ttype = TS_WORD;
+        kind = TS_WORD;
       }
       break;
 
@@ -418,23 +420,23 @@ get_token(TParser* pst)
     case L'O':
     case L'Ô':
       /* v.v ô.ô O_o */
-      if ((tlen = is_face_emoticon(pst))) {
-        ttype = TS_EMOTICON;
+      if ((length = is_face_emoticon(pst))) {
+        kind = TS_EMOTICON;
         chtype = Ch_Punct;
-        pst->pos += tlen;
+        pst->pos += length;
         goto EndToken;
       } else {
         chtype = Ch_Word;
-        ttype = TS_WORD;
+        kind = TS_WORD;
       }
       break;
 
     case L'(':
     case L'[':
       /* (: */
-      if ((tlen = is_side_emoticon(pst, 0))) {
-        ttype = TS_EMOTICON;
-        pst->pos += tlen;
+      if ((length = is_side_emoticon(pst, 0))) {
+        kind = TS_EMOTICON;
+        pst->pos += length;
         goto EndToken;
       }
       chtype = is_intrapar_start(pst, c) ? Ch_Word : Ch_Punct;
@@ -445,25 +447,25 @@ get_token(TParser* pst)
       /* www.on-tenk.com */
       if (parse_url(pst, c)) {
         chtype = Ch_Word;
-        ttype = TS_URL;
+        kind = TS_URL;
         goto EndToken;
       }
-      ttype = TS_WORD;
+      kind = TS_WORD;
       chtype = Ch_Word;
       break;
 
     case L'-':
       chtype = Ch_Punct;
-      ttype = Ch_Punct;
+      kind = Ch_Punct;
       /* -je */
-      if (pst->_next == TS_WORD) {
-        pst->_next = TS_START;
+      if (pst->next == TS_WORD) {
+        pst->next = TS_START;
         pst->pos++;
         chtype = Ch_Word;
-        ttype = TS_WORD;
+        kind = TS_WORD;
         /* ---> */
-      } else if ((tlen = is_arrow(pst))) {
-        pst->pos += tlen;
+      } else if ((length = is_arrow(pst))) {
+        pst->pos += length;
         goto EndToken;
       } else {
         pst->pos++;
@@ -479,23 +481,23 @@ get_token(TParser* pst)
   switch (chtype) {
 
     case Ch_Word:
-      ttype = parse_word(pst);
+      kind = parse_word(pst);
       break;
 
     case Ch_Digit:
-      ttype = parse_digit(pst);
+      kind = parse_digit(pst);
       break;
 
     case Ch_Ctrl:
     case Ch_Space:
     case Ch_PunctEndSent:
-      ttype = chtype;
+      kind = chtype;
       while (pst->pos < pst->strlen && getchtype(pst->str[pst->pos]) == chtype)
         pst->pos++;
       break;
 
     case Ch_CiteKeyChar:
-      ttype = TS_CITEKEY;
+      kind = TS_CITEKEY;
       pst->pos++;
       parse_citekey(pst);
       break;
@@ -503,7 +505,7 @@ get_token(TParser* pst)
     case Ch_Punct:
     default:
       pst->pos++;
-      ttype = TS_PUNCT;
+      kind = TS_PUNCT;
       break;
   }
 
@@ -514,15 +516,15 @@ EndToken:
     pst->pos = pst->strlen;
 
   /* update the token informations */
-  pst->tlen = pst->pos - pst->tidx;
-  pst->ttype = ttype;
-  pst->_prev = ttype;
+  pst->token.length = pst->pos - pst->token.index;
+  pst->token.kind = kind;
+  pst->prev = kind;
 
   // TODO: only optionally maintain bytes indexes
   // TODO: optimize this if possible
   update_byte_index(pst);
 
-  return ttype;
+  return kind;
 }
 
 void
@@ -530,16 +532,16 @@ update_byte_index(TParser* pst)
 {
   char buf[32];
 
-  pst->bidx += pst->blen;
-  pst->blen = 0;
+  pst->token.byte_index += pst->token.byte_length;
+  pst->token.byte_length = 0;
 
-  jchar* ptr = &pst->str[pst->tidx];
+  jchar* ptr = &pst->str[pst->token.index];
 
-  for (int i = 0; i < pst->tlen; i++) {
+  for (int i = 0; i < pst->token.length; i++) {
     wchar_t wc = ptr[i];
     // if wchar_t is ascii, then mb = 1, else compute it.
     // source of iswascii: https://github.com/lattera/freebsd (iswctype.c)
     // (wctomb is very slow, that's why i want to avoid it when possible.)
-    pst->blen += ((wc & ~0x7F) == 0) ? 1 : wctomb(buf, wc);
+    pst->token.byte_length += ((wc & ~0x7F) == 0) ? 1 : wctomb(buf, wc);
   }
 }

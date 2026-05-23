@@ -1,7 +1,19 @@
 #ifndef PARSER_H
 #define PARSER_H
 
-typedef unsigned int jchar; // jchar == pg_wchar == Py_UCS4
+// jchar == pg_wchar == Py_UCS4 == wchar_t
+typedef unsigned int jchar;
+
+// the current token informations
+typedef struct
+{
+  int index;
+  int length;
+  int byte_index;
+  int byte_length;
+  int line_number;
+  int kind;
+} Token;
 
 // the parser struct holds informations about string to be parsed,
 // state (position) and current token.
@@ -9,17 +21,9 @@ typedef struct
 {
   // the whole string to parse
   jchar* str; // the string to be parsed
-  int strlen;   // the length of the string
-  int pos;      // the current position
-
-  // current token
-  int tlen;  // length
-  int tidx;  // index (first character)
-  int ttype; // token type (word, space, ...)
-
-  // bytes index and length
-  int blen;  // byte length
-  int bidx;  // byte index
+  int strlen; // the length of the string
+  int pos;    // the current position
+  int line_number;
 
   // for char*.
   // (not used by 'get_token', only for the Postgres extension)
@@ -30,15 +34,21 @@ typedef struct
 
   // sometimes, the type of the next token is known in advance.
   // used by the parser for cases like 'penses-tu' (penses -tu).
-  int _next;
-  int _prev;
+  int next;
+  int prev;
+
+  // the current token
+  Token token;
 
 } TParser;
 
 // main functions
-int get_token(TParser* pst);
-void init_parser(TParser* pst, jchar* str, int len);
-TParser new_parser();
+int
+get_token(TParser* pst);
+void
+init_parser(TParser* pst, jchar* str, int len);
+TParser
+new_parser();
 
 // token types identifiers
 #define TS_ANY -2

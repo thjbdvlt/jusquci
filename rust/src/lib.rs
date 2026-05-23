@@ -19,24 +19,18 @@ pub fn setlocale() -> Result<(), std::io::Error> {
 /// a token
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Token<'a> {
-    /// the text
     pub text: &'a str,
-    /// the token type
-    pub ttype: i32,
-    /// the token char index
-    pub cidx: usize,
-    /// the number of chars in the token
-    pub clen: usize,
-    /// the token byte index
-    pub bidx: usize,
-    /// the number of bytes in the token
-    pub blen: usize,
+    pub kind: i32,
+    pub char_index: usize,
+    pub char_length: usize,
+    pub byte_index: usize,
+    pub byte_length: usize,
 }
 
 impl<'a> Token<'a> {
     pub fn is_word(&self) -> bool {
         matches!(
-            self.ttype,
+            self.kind,
             parser::TS_WORD | parser::TS_ABBREV | parser::TS_COMPOUND
         )
     }
@@ -55,23 +49,20 @@ pub fn tokenize<'a>(s: &'a str) -> Vec<Token<'a>> {
         init_parser(&mut pst, ptr, ws_len);
         // get tokens
         loop {
-            let ttype = get_token(&mut pst);
-            if ttype == parser::TS_END {
+            let token_type = get_token(&mut pst);
+            if token_type == parser::TS_END {
                 break;
             } else {
-                if ttype != parser::TS_SPACE {
-                    let cidx = pst.tidx as usize;
-                    let clen = pst.tlen as usize;
-                    let bidx = pst.bidx as usize;
-                    let blen = pst.blen as usize;
-                    let text = &s[bidx..bidx + blen];
+                if token_type != parser::TS_SPACE {
+                    let bidx = pst.token.byte_index as usize;
+                    let blen = pst.token.byte_length as usize;
                     tokens.push(Token {
-                        bidx,
-                        blen,
-                        ttype,
-                        text,
-                        cidx,
-                        clen,
+                        text: &s[bidx..bidx + blen],
+                        kind: token_type,
+                        byte_index: bidx,
+                        byte_length: blen,
+                        char_index: pst.token.index as usize,
+                        char_length: pst.token.length as usize,
                     });
                 }
             }
@@ -90,12 +81,12 @@ mod tests {
         let text = "Oùùù puis-je m'installer?";
         let tokens = tokenize(text);
         let t = &tokens[2];
-        assert_eq!(&text[t.bidx..t.bidx + t.blen], "-je");
+        assert_eq!(&text[t.byte_index..t.byte_index + t.byte_length], "-je");
         let t = &tokens[0];
-        assert_eq!(&text[t.bidx..t.bidx + t.blen], "Oùùù");
+        assert_eq!(&text[t.byte_index..t.byte_index + t.byte_length], "Oùùù");
         assert_eq!(t.text, "Oùùù");
-        let _ = text.to_owned().insert_str(t.bidx + t.blen, "__");
-        let _ = text.to_owned().insert_str(t.bidx, "__");
+        let _ = text.to_owned().insert_str(t.byte_index + t.byte_length, "__");
+        let _ = text.to_owned().insert_str(t.byte_index, "__");
     }
 
     #[test]
@@ -105,6 +96,6 @@ mod tests {
         let tokens = tokenize(text);
         let verb = &tokens[0];
         let subj = &tokens[1];
-        assert_eq!(verb.ttype, subj.ttype);
+        assert_eq!(verb.kind, subj.kind);
     }
 }

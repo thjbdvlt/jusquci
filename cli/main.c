@@ -1,12 +1,13 @@
 #include "../src/parser.h"
-#include <wctype.h>
-#include <wchar.h>
 #include <locale.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <wchar.h>
+#include <wctype.h>
 
 #include <argp.h>
-struct arguments {
+struct arguments
+{
   int newline;
 };
 const char* argp_program_version = "v0.1.0";
@@ -14,7 +15,12 @@ static char args_doc[] = "<command> [...]";
 static char doc[] = "Tokenizer for french.";
 
 static struct argp_option options[] = {
-  { "newline", 'n', NULL, 0, "Add a newline instead of space between tokens", 0 },
+  { "newline",
+    'n',
+    NULL,
+    0,
+    "Add a newline instead of space between tokens",
+    0 },
 };
 
 error_t
@@ -22,11 +28,11 @@ parse_opt(int key, char* arg, struct argp_state* state)
 {
   struct arguments* arguments = state->input;
   switch (key) {
-  case 'n':
-    arguments->newline = 1;
-    break;
-  default:
-    return ARGP_ERR_UNKNOWN;
+    case 'n':
+      arguments->newline = 1;
+      break;
+    default:
+      return ARGP_ERR_UNKNOWN;
   }
   return 0;
 };
@@ -52,14 +58,13 @@ tokenize_print(TParser* pst, jchar* text, int len, int newline)
     if (ttype != TS_SPACE && ttype != TS_END) {
 
       // iterate over the chars of the token
-      for (int c = 0; c < pst->tlen; c++)
-        putwchar((wchar_t)pst->str[pst->tidx + c]);
+      for (int c = 0; c < pst->token.length; c++)
+        putwchar((wchar_t)pst->str[pst->token.index + c]);
 
       if (newline)
         putwchar(L'\n');
       else
         putwchar(L' ');
-
     }
 
   } while (ttype != TS_END);
